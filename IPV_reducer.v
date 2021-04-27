@@ -2,34 +2,55 @@ module IPV_reducer(
   input  clk,
   input  rst_n,
   input  ipv_in,
+  input  valid,
   output [k-1:0] vov,
 )(#parameter k = 4);
 
+///////////////////////////////////////////
+/////          parameter              /////
+///////////////////////////////////////////
+
 parameter stall_cycle = 3;
+
+///////////////////////////////////////////
+/////          reg & wire             /////
+///////////////////////////////////////////
 
 reg [2:0] counter, next_counter; // for k max = 8
 reg [k-1:0] ipv, next_ipv;
 reg [k-1:0] ipv_stall[0:stall_cycle-1], next_ipv_stall[0:stall_cycle-1];
 
+///////////////////////////////////////////
+/////          combinational          /////
+///////////////////////////////////////////
+
 assign vov = ipv_stall[stall_cycle-1];
 
+// input & state logic
 always @(*) begin
-  if (counter == k-1) begin
-    next_counter = 3'd0;
-  end
-  else begin
-    next_counter = counter + 1;
-  end
+  if (valid) begin
+    if (counter == k-1) begin
+      next_counter = 3'd0;
+    end
+    else begin
+      next_counter = counter + 1;
+    end
 
-  if (counter == 0) begin
-    next_ipv[k-2:0] = 0;
-    next_ipv[k-1] = ipv_in;
+    if (counter == 0) begin
+      next_ipv[k-2:0] = 0;
+      next_ipv[k-1] = ipv_in;
+    end
+    else begin
+      next_ipv = {ipv_in, ipv[k-1:1]};
+    end
   end
   else begin
-    next_ipv = {ipv_in, ipv[k-1:1]};
+    next_counter = counter;
+    next_ipv = ipv;
   end
 end
 
+// stall logic
 integer i;
 always @(*) begin
   for(i = 1; i < stall_cycle; i=i+1) begin
@@ -43,6 +64,9 @@ always @(*) begin
   end
 end
 
+///////////////////////////////////////////
+/////           sequential            /////
+///////////////////////////////////////////
 integer j;
 always @(posedge clk or negedge rst_n) begin
   if (!rst_n) begin
