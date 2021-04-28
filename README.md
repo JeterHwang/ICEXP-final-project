@@ -8,9 +8,11 @@ git clone https://github.com/JeterHwang/ICEXP-final-project.git
 ```
 
 ## File structure
+```
 .
 +-- README.md
 +-- src
 |   +-- adderAccumulator.v
 +-- tb
 |   +-- aac_tb.v
+```
