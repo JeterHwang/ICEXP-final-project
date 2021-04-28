@@ -1,5 +1,4 @@
-`include "usr/cad/synopsys/synthesis/cur/dw/sim_ver/DW01_add.v"
-module AAC(clk, reset_n, A_i, out);
+module AAC(clk, reset_n, aac, A_i, out);
     input clk;
     input reset_n;
     input aac;
@@ -18,28 +17,24 @@ module AAC(clk, reset_n, A_i, out);
     reg [11:0] MSB_adder_w;
     reg [11:0] LZAB_w;
     reg [11:0] MZAB_w;
-    reg CO;
 
-    DW01_add #(width) MSBAdder (
-        .A(WR_r),
-        .B(MZAB_w),
-        .CI(carry_r),
-        .sum(MSB_adder_w),
-        .CO(CO)
-    );
+    assign out = {MSB_adder_w, LAR_r};
 
     always @(*) begin
         AAC_w       = aac;
-        LZAB_w      = LAR_r & {12{aac}};
-        MZAB_w      = MAR_r & {12{AAC_r}};
-        LSB_adder_w = {1'b0, A_i[11:0]} + {1'b0, LZAB_w};
+        carry_w     = LSB_adder_w[12];
         MAR_w       = MSB_adder_w;
         LAR_w       = LSB_adder_w[11:0];
         WR_w        = A_i[23:12];
-        carry_w     = LSB_adder_w[12];
+        
+        LZAB_w      = LAR_r & {12{aac}};
+        MZAB_w      = MAR_r & {12{AAC_r}};
+        
+        LSB_adder_w = {1'b0, A_i[11:0]} + {1'b0, LZAB_w};
+        MSB_adder_w = WR_r + MZAB_w + carry_r;
     end
 
-    always @(posedge clk or negedge reset_n) begin
+    always @(posedge clk, negedge reset_n) begin
         if(!reset_n) begin
             AAC_r   <= 1'b0;
             carry_r <= 1'b0;
