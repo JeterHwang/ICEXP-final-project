@@ -60,12 +60,14 @@ module aac_tb;
                         $display("Reach end of file :( ");
                     end
                 end
-                $fscanf(ans, "%h\n", golden);
-                if(golden !== out) begin
-                    if(err_num == 0) 
-                        $display("Error !!");
-                    $display("Case %d: Expected %d, but got %d", i, golden, out);
-                    err_num = err_num + 1;
+                if(i > 0) begin
+                    $fscanf(ans, "%h\n", golden);
+                    if(golden !== out) begin
+                        if(err_num == 0) 
+                            $display("Error !!");
+                        $display("Case %d: Expected %d, but got %d", i, golden, out);
+                        err_num = err_num + 1;
+                    end    
                 end
             end
         end
