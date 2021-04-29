@@ -2,7 +2,7 @@ module SMVM(
   input  clk,
   input  rst_n,
   input  [7:0] data_in,
-  input  in_valid;
+  input  in_valid,
   output out_valid,
   output [14:0] data_out,
 );
@@ -68,7 +68,7 @@ always @(*) begin
     IDLE   : next_state = in_valid ? COL_IN : IDLE;
     COL_IN : next_state = VAL_IN;
     VEC_IN : begin
-      if (vec_count == rows-1) next_state = VAL_IN;
+      if (vec_count == cols-1) next_state = VAL_IN;
       else next_state = VEC_IN;
     end
     VAL_IN : next_state = in_valid ? IDX_IN : CAL;
@@ -76,7 +76,7 @@ always @(*) begin
     IPV_IN : next_state = VAL_IN;
     CAL    : next_state = CAL;  // FIXME
     OUT    : next_state = IDLE; // FIXME
-    default: next_state = IDLE;
+    default: next_state = IDLE; 
   endcase
 end
 
@@ -110,7 +110,7 @@ always @(*) begin
     end
     VEC_IN: begin
       // state
-      if (vec_count == rows-1) next_vec_count = 0;
+      if (vec_count == cols-1) next_vec_count = 0;
       else next_vec_count = vec_count + 1;
 
       // value

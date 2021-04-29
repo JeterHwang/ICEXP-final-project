@@ -41,7 +41,12 @@ always @(*) begin
       next_ipv[k-1] = ipv_in;
     end
     else begin
-      next_ipv = {ipv_in, ipv[k-1:1]};
+      if (ipv_in) begin
+        next_ipv = {1'b1, ipv[k-1:1]};
+      end
+      else begin
+        next_ipv = ipv;
+      end
     end
   end
   else begin
