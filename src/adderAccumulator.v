@@ -21,17 +21,17 @@ module AAC(clk, reset_n, aac, A_i, out);
     assign out = {MSB_adder_w, LAR_r};
 
     always @(*) begin
+        LSB_adder_w = {1'b0, A_i[11:0]} + {1'b0, LZAB_w};
+        MSB_adder_w = WR_r + MZAB_w + carry_r;
+
+        LZAB_w      = LAR_r & {12{aac}};
+        MZAB_w      = MAR_r & {12{AAC_r}};
+        
         AAC_w       = aac;
         carry_w     = LSB_adder_w[12];
         MAR_w       = MSB_adder_w;
         LAR_w       = LSB_adder_w[11:0];
         WR_w        = A_i[23:12];
-        
-        LZAB_w      = LAR_r & {12{aac}};
-        MZAB_w      = MAR_r & {12{AAC_r}};
-        
-        LSB_adder_w = {1'b0, A_i[11:0]} + {1'b0, LZAB_w};
-        MSB_adder_w = WR_r + MZAB_w + carry_r;
     end
 
     always @(posedge clk, negedge reset_n) begin
