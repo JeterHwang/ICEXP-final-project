@@ -164,8 +164,8 @@ always @(*) begin
     end
   end
   else begin
-    alu_mat_in = 0;
-    alu_vec_in = 0;
+    alu_mat_in = (8*k-1)'d0;
+    alu_vec_in = (8*k-1)'d0;
   end
 end
 
