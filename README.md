@@ -13,6 +13,15 @@ git clone https://github.com/JeterHwang/ICEXP-final-project.git
 +-- README.md
 +-- src
 |   +-- adderAccumulator.v
+|   +-- IPV_reducer.v
+|   +-- SMVM.v
 +-- tb
 |   +-- aac_tb.v
+|   +-- reudcer_tb.v
+|   +-- dat
+|   |   +-- aac_ans.dat
+|   |   +-- aac_data1.dat
+|   |   +-- aac_data2.dat
+|   |   +-- ipv_in.dat
+|   |   +-- vov_out.dat
 ```
