@@ -29,7 +29,7 @@ module reducer_tb;
     always #(`HCYCLE) clk = ~clk;
 
     initial begin
-        $fsdbDumpfile("aac.fsdb");            
+        $fsdbDumpfile("reducer.fsdb");            
         $fsdbDumpvars(0,reducer_tb,"+mda");
 
         data    = $fopen(`dataIn, "r");
@@ -54,7 +54,7 @@ module reducer_tb;
                     $display("Reach end of file :( ");
                 end
                 
-                if((i - 3) % k == 0) begin
+                if(i > 2 && (i - 2) % k == 0) begin
                     $fscanf(ans, "%b\n", golden);
                     if(golden !== vov) begin
                         if(err_num == 0) 
