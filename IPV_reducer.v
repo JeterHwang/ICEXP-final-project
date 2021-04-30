@@ -1,10 +1,11 @@
-module IPV_reducer(
+module IPV_reducer #(parameter k = 4)
+(
   input  clk,
   input  rst_n,
   input  ipv_in,
   input  valid,
   output [k-1:0] vov,
-)(#parameter k = 4);
+);
 
 ///////////////////////////////////////////
 /////          parameter              /////
