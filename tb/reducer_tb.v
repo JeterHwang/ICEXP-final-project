@@ -22,8 +22,8 @@ module reducer_tb;
     IPV_reducer #(.k(k)) reducer(
         .clk(clk),
         .reset_n(reset_n),
-        .ipv_in(),
-        .vov()
+        .ipv_in(ipv_in),
+        .vov(vov)
     );
 
     always #(`HCYCLE) clk = ~clk;
@@ -56,7 +56,7 @@ module reducer_tb;
                 
                 if((i - 3) % k == 0) begin
                     $fscanf(ans, "%b\n", golden);
-                    if(golden !== out) begin
+                    if(golden !== vov) begin
                         if(err_num == 0) 
                             $display("Error !!");
                         $display("Case %d: Expected %d, but got %d", i, golden, out);
