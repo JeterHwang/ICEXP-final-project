@@ -36,7 +36,15 @@ reg        [7:0] col[0:k-1], next_col[0:k-1]; // k * column index
 reg              ipv[0:k-1], next_ipv[0:k-1]; // k * ipv
 
 // inter connect
-// reg signed [7:0] alu_l1_in;
+// alu
+reg [8*k-1:0] alu_mat_in;
+reg [8*k-1:0] alu_vec_in;
+reg [15:0]    alu_l1_out;
+reg           alu_l1_en;
+
+// reducer
+reg  [k-1:0]   reducer_ipv_in;
+wire [k-1:0]   vov;
 
 ///////////////////////////////////////////
 /////           submodule             /////
@@ -47,15 +55,22 @@ Map_table_L3 map_l3();
 Map_table_L4 map_l4();
 
 ALU_L1 alu_l1(
-  .matrix_in(),
-  .vector_in(),
+  .matrix_in(alu_mat_in),
+  .vector_in(alu_vec_in),
+  .L1_out(alu_l1_out),
+  .en(alu_l1_en)
 );
 ALU_L2 alu_l2();
 ALU_L3 alu_l3();
 ALU_L4 alu_l4();
 
 IPV_encoder encoder();
-IPV_reducer reducer();
+IPV_reducer reducer(
+  .clk(clk),
+  .rst_n(rst_n),
+  .ipv_in(reducer_ipv_in),
+  .vov(vov)
+);
 
 AAC aac_l();
 AAC aac_r();
@@ -139,10 +154,28 @@ always @(*) begin
   endcase
 end
 
-// alu logic
+// ALU L1 input logic
+integer l;
 always @(*) begin
   if (input_count == k-1) begin
-    
+    for (l = 0; l < k; l=l+1) begin
+      alu_mat_in[8*(k-l)-1:8*(k-l+1)] = val[l];
+      alu_vec_in[8*(k-l)-1:8*(k-l+1)] = vec[col[l]];
+    end
+  end
+  else begin
+    alu_mat_in = 0;
+    alu_vec_in = 0;
+  end
+end
+
+// IPV reducer input logic
+always @(*) begin
+  if (state == MAT_IN) begin
+    reducer_ipv_in = ipv_in;
+  end
+  else begin
+    reducer_ipv_in = 0;
   end
 end
 
@@ -151,7 +184,7 @@ end
 /////           sequential            /////
 ///////////////////////////////////////////
 integer i;
-always@ (posedge clk, negedge rst_n) begin
+always@ (posedge clk or negedge rst_n) begin
   if (!rst_n) begin
     state <= IDLE;
     rows <= 0;
