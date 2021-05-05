@@ -1,3 +1,4 @@
+`include "ALU_maple.v"
 module SMVM(
   input         clk,
   input         rst_n,
