@@ -6,7 +6,7 @@ module ALU_L1 #(parameter k = 4)(
               en         
     );
     /* ==================== IO ==================== */
-    input         [8*k-1:0]  matrix_in ;
+    input         [8*k-1:0]  matrix_in ; 
     input         [8*k-1:0]  vector_in ; 
     output        [16*k-1:0] L1_out    ;
     output                   en        ;
@@ -21,10 +21,10 @@ module ALU_L1 #(parameter k = 4)(
     assign mat_4 = matrix_in[8*k-25:0]     ;
 
     //deco vector_in
-    assign vec_1 = vec_in[8*k-1:8*k-8]     ;
-    assign vec_2 = vec_in[8*k-9:8*k-16]    ;
-    assign vec_3 = vec_in[8*k-17:8*k-24]   ;
-    assign vec_4 = vec_in[8*k-25:0]        ;
+    assign vec_1 = vector_in[8*k-1:8*k-8]  ;
+    assign vec_2 = vector_in[8*k-9:8*k-16] ;
+    assign vec_3 = vector_in[8*k-17:8*k-24];
+    assign vec_4 = vector_in[8*k-25:0]     ;
 
     //deco output
     assign L1_out[16*k-1:16*k-16]  = mat_1 * vec_1;
@@ -32,7 +32,7 @@ module ALU_L1 #(parameter k = 4)(
     assign L1_out[16*k-33:16*k-48] = mat_3 * vec_3;
     assign L1_out[16*k-49:0]       = mat_4 * vec_4;
 
-    //signal of ready
+    //signal of ready to process the new 4 bits
     assign en = (matrix_in[8*k-1:8*k-8] == 8'b0)? 1'b0 : 1'b1 ;
 
 endmodule
@@ -41,7 +41,9 @@ endmodule
 
 
 //MAPTABLE_level_1
-module MPT4_L1 #(parameter k = 4)(
+module Map_table_L1 #(parameter k = 4)(
+                clk,
+                rst,
                 en,
                 IPV_in,
                 L1_out,
@@ -49,6 +51,7 @@ module MPT4_L1 #(parameter k = 4)(
                 IPV_out        
     );
     /* ==================== IO ==================== */
+    input          clk,rst    ;
     input          en         ;
     input   [3:0]  IPV_in     ;
     input   [16*k-1:0] L1_out ;
@@ -59,32 +62,39 @@ module MPT4_L1 #(parameter k = 4)(
     reg [32*k-1:0] L2_in_r;
     wire[32*k-1:0] L2_in_w;
     /* ================== Conti =================== */
-    assign L2_in_w[32*k-1:32*k-16]    = ((IPV == 4'd0)||(IPV == 4'd1)||(IPV == 4'd2)||(IPV == 4'd3))? (L1_out[16*k-1:16*k-16]) : 
-                                        ((IPV == 4'd4)||(IPV == 4'd5))                              ? (L1_out[16*k-17:16*k-32]):
-                                        (IPV == 4'd6)                                               ? (L1_out[16*k-33:16*k-48]): (16'b0) ; 
-    assign L2_in_w[32*k-17:32*k-32]   = ((IPV == 4'd0)||(IPV == 4'd1)||(IPV == 4'd2)||(IPV == 4'd3))? (L1_out[16*k-17:16*k-32]): 
-                                        ((IPV == 4'd4)||(IPV == 4'd5))                              ? (L1_out[16*k-33:16*k-48]):
-                                        (IPV == 4'd6)                                               ? (L1_out[16*k-49:0])      : (16'b0) ;  
-    assign L2_in_w[32*k-33:32*k-48]   = ((IPV == 4'd0)||(IPV == 4'd2))                              ? (L1_out[16*k-33:16*k-48]): (16'b0) ; 
-    assign L2_in_w[32*k-49:32*k-64]   = ((IPV == 4'd0)||(IPV == 4'd2))                              ? (L1_out[16*k-49:0])      : (16'b0) ; 
-    assign L2_in_w[32*k-65:32*k-80]   = ((IPV == 4'd4)||(IPV == 4'd5)||(IPV == 4'd6)||(IPV == 4'd7))? (L1_out[16*k-1:16*k-16]) : 
-                                        ((IPV == 4'd1)||(IPV == 4'd3))                              ? (L1_out[16*k-33:16*k-48]): (16'b0) ; 
-    assign L2_in_w[32*k-81:32*k-96]   = ((IPV == 4'd1)||(IPV == 4'd3)||(IPV == 4'd4)||(IPV == 4'd5))? (L1_out[16*k-49:0])      : 
-                                        ((IPV == 4'd6)||(IPV == 4'd7))                              ? (L1_out[16*k-17:16*k-32]): (16'b0) ; 
-    assign L2_in_w[32*k-97:32*k-112]  = (IPV == 4'd7)                                               ? (L1_out[16*k-33:16*k-48]): (16'b0) ; 
-    assign L2_in_w[32*k-113:0]        = (IPV == 4'd7)                                               ? (L1_out[16*k-49:0])      : (16'b0) ; 
-
+    //pass IPV to Map_table_L2
     assign IPV_out = IPV_r;
+    //input to ALU_L2
+    assign L2_in   = L2_in_r;
+
+    //Match in/out
+    assign L2_in_w[32*k-1:32*k-16]    = ((IPV_in == 4'd0)||(IPV_in == 4'd1)||(IPV_in == 4'd2)||(IPV_in == 4'd3))? (L1_out[16*k-1:16*k-16]) : 
+                                        ((IPV_in == 4'd4)||(IPV_in == 4'd5))                                    ? (L1_out[16*k-17:16*k-32]):
+                                        (IPV_in == 4'd6)                                                        ? (L1_out[16*k-33:16*k-48]): (16'b0) ; 
+    assign L2_in_w[32*k-17:32*k-32]   = ((IPV_in == 4'd0)||(IPV_in == 4'd1)||(IPV_in == 4'd2)||(IPV_in == 4'd3))? (L1_out[16*k-17:16*k-32]): 
+                                        ((IPV_in == 4'd4)||(IPV_in == 4'd5))                                    ? (L1_out[16*k-33:16*k-48]):
+                                        (IPV_in == 4'd6)                                                        ? (L1_out[16*k-49:0])      : (16'b0) ;  
+    assign L2_in_w[32*k-33:32*k-48]   = ((IPV_in == 4'd0)||(IPV_in == 4'd2))                                    ? (L1_out[16*k-33:16*k-48]): (16'b0) ; 
+    assign L2_in_w[32*k-49:32*k-64]   = ((IPV_in == 4'd0)||(IPV_in == 4'd2))                                    ? (L1_out[16*k-49:0])      : (16'b0) ; 
+    assign L2_in_w[32*k-65:32*k-80]   = ((IPV_in == 4'd4)||(IPV_in == 4'd5)||(IPV_in == 4'd6)||(IPV_in == 4'd7))? (L1_out[16*k-1:16*k-16]) : 
+                                        ((IPV_in == 4'd1)||(IPV_in == 4'd3))                                    ? (L1_out[16*k-33:16*k-48]): (16'b0) ; 
+    assign L2_in_w[32*k-81:32*k-96]   = ((IPV_in == 4'd1)||(IPV_in == 4'd3)||(IPV_in == 4'd4)||(IPV_in == 4'd5))? (L1_out[16*k-49:0])      : 
+                                        ((IPV_in == 4'd6)||(IPV_in == 4'd7))                                    ? (L1_out[16*k-17:16*k-32]): (16'b0) ; 
+    assign L2_in_w[32*k-97:32*k-112]  = (IPV_in == 4'd7)                                                        ? (L1_out[16*k-33:16*k-48]): (16'b0) ; 
+    assign L2_in_w[32*k-113:0]        = (IPV_in == 4'd7)                                                        ? (L1_out[16*k-49:0])      : (16'b0) ; 
+
+
     /* ================ Combination =============== */
+    //lock IPV
     always @(*) begin
-        if (en) IPV_w = IPV   ;
+        if (en) IPV_w = IPV_in;
         else    IPV_w = IPV_r ;
     end
     /* ================ Sequencial ================ */
     always @(posedge clk) begin
         if (~rst) begin
             IPV_r   <= 4'b0;
-            L2_in_r <= {(32*k){1'b0}}; 
+            L2_in_r <= {(32*k){1'b0}};
         end 
         else begin
             IPV_r   <= IPV_w;
@@ -92,6 +102,8 @@ module MPT4_L1 #(parameter k = 4)(
         end
     end
 endmodule
+
+
 
 
 
@@ -128,48 +140,57 @@ endmodule
 
 
 //MAPTABLE_level_2
-module MPT4_L2 #(parameter k = 4)(
+module Map_table_L2 #(parameter k = 4)(
+                clk,
+                rst,
                 IPV_in,
                 L2_out,
                 L3_in,
                 IPV_out    
     );
     /* ==================== IO ==================== */
-    input         [3:0]  IPV_in;
+    input         clk,rst           ;
+    input         [3:0]  IPV_in     ;
     input         [17*6-1:0] L2_out ;
     output        [17*6-1:0] L3_in  ;
-    output        [3:0]  IPV_out;
+    output        [3:0]  IPV_out    ;
     /* ================= WIRE/REG ================= */
     reg [17*6-1:0] L3_in_r;
     wire[17*6-1:0] L3_in_w;
     /* ================== Conti =================== */
-    assign L3_in_w[17*6-1:17*k-17]    = ((IPV == 4'd0)||(IPV == 4'd1)||(IPV == 4'd4))               ? (L2_out[17*6-1:17*6-17]) : (17'b0) ;
-    assign L3_in_w[17*6-18:17*k-34]   = (IPV == 4'd0)                                               ? (L2_out[17*6-18:17*6-34]): 
-                                        (IPV == 4'd1)                                               ? (L2_out[17*6-35:17*6-51]):
-                                        (IPV == 4'd4)                                               ? (L2_out[17*6-52:17*6-68]): (17'b0) ;  
-    assign L3_in_w[17*6-35:17*k-51]   = ((IPV == 4'd4)||(IPV == 4'd5)||(IPV == 4'd6)||(IPV == 4'd7))? (L2_out[17*6-35:17*6-51]): 
-                                        ((IPV == 4'd2)||(IPV == 4'd3))                              ? (L2_out[17*6-1:17*6-17]) :
-                                        (IPV == 4'd1)                                               ? (L2_out[17*6-52:17*6-68]): (17'b0) ;
-    assign L3_in_w[17*6-52:17*k-68]   = ((IPV == 4'd6)||(IPV == 4'd7))                              ? (L2_out[17*6-52:17*6-68]): 
-                                        (IPV == 4'd5)                                               ? (L2_out[17*6-1:17*6-17] ):
-                                        (IPV == 4'd3)                                               ? (L2_out[17*6-35:17*6-51]):
-                                        (IPV == 4'd2)                                               ? (L2_out[17*6-18:17*6-34]): (17'b0) ;  
-    assign L3_in_w[17*6-69:17*k-85]   = ((IPV == 4'd3)||(IPV == 4'd5))                              ? (L2_out[17*6-52:17*6-68]): 
-                                        (IPV == 4'd6)                                               ? (L2_out[17*6-1:17*6-17]) :
-                                        (IPV == 4'd7)                                               ? (L2_out[17*6-69:17*6-85]): (17'b0) ;
-    assign L3_in_w[17*6-86:0]         = (IPV == 4'd7)                                               ? (L2_out[17*6-86:0])      : (17'b0) ; 
-                                        
-    assign IPV_out = IPV_r;
+    //pass IPV to Map_table_L3              
+    assign IPV_out = IPV_in;
+    //input to ALU_L3
+    assign L3_in   = L3_in_r;
+
+    //Match in/out
+    assign L3_in_w[17*6-1:17*6-17]    = ((IPV_in == 4'd0)||(IPV_in == 4'd1)||(IPV_in == 4'd4))         ? (L2_out[17*6-1:17*6-17]) : (17'b0) ;
+    assign L3_in_w[17*6-18:17*6-34]   = (IPV_in == 4'd0)                                               ? (L2_out[17*6-18:17*6-34]): 
+                                        (IPV_in == 4'd1)                                               ? (L2_out[17*6-35:17*6-51]):
+                                        (IPV_in == 4'd4)                                               ? (L2_out[17*6-52:17*6-68]): (17'b0) ;  
+    assign L3_in_w[17*6-35:17*6-51]   = ((IPV_in == 4'd4)||(IPV_in == 4'd5)||(IPV_in == 4'd6)||(IPV_in == 4'd7))? (L2_out[17*6-35:17*6-51]): 
+                                        ((IPV_in == 4'd2)||(IPV_in == 4'd3))                           ? (L2_out[17*6-1:17*6-17]) :
+                                        (IPV_in == 4'd1)                                               ? (L2_out[17*6-52:17*6-68]): (17'b0) ;
+    assign L3_in_w[17*6-52:17*6-68]   = ((IPV_in == 4'd6)||(IPV_in == 4'd7))                           ? (L2_out[17*6-52:17*6-68]): 
+                                        (IPV_in == 4'd5)                                               ? (L2_out[17*6-1:17*6-17] ):
+                                        (IPV_in == 4'd3)                                               ? (L2_out[17*6-35:17*6-51]):
+                                        (IPV_in == 4'd2)                                               ? (L2_out[17*6-18:17*6-34]): (17'b0) ;  
+    assign L3_in_w[17*6-69:17*6-85]   = ((IPV_in == 4'd3)||(IPV_in == 4'd5))                           ? (L2_out[17*6-52:17*6-68]): 
+                                        (IPV_in == 4'd6)                                               ? (L2_out[17*6-1:17*6-17]) :
+                                        (IPV_in == 4'd7)                                               ? (L2_out[17*6-69:17*6-85]): (17'b0) ;
+    assign L3_in_w[17*6-86:0]         = (IPV_in == 4'd7)                                               ? (L2_out[17*6-86:0])      : (17'b0) ; 
     /* ================ Sequencial ================ */
     always @(posedge clk) begin
         if (~rst) begin
-            L3_in_r <= {(17 * 16){1'b0}}; 
+            L3_in_r <= {(17*6){1'b0}}; 
         end 
         else begin
             L3_in_r <= L3_in_w;
         end
     end
 endmodule
+
+
 
 //ALU_level_3
 module ALU_L3 #(parameter k = 4)(
@@ -202,13 +223,16 @@ endmodule
 
 
 //MAPTABLE_level_3
-module MPT4_L3 #(parameter k = 4)(
+module Map_table_L3 #(parameter k = 4)(
+                clk,
+                rst,
                 IPV_in,
                 L3_out,
                 L4_in,
                 IPV_out    
     );
     /* ==================== IO ==================== */
+    input         clk,rst    ;
     input         [3:0]  IPV_in;
     input         [18*5-1:0] L3_out ;
     output        [18*4-1:0] L4_in  ;
@@ -217,17 +241,21 @@ module MPT4_L3 #(parameter k = 4)(
     reg [18*4-1:0] L4_in_r;
     wire[18*4-1:0] L4_in_w;
     /* ================== Conti =================== */
-    assign L4_in_w[17*6-1:17*k-17]    = ((IPV == 4'd0)||(IPV == 4'd1))                              ? L3_out[18*5-1:18*5-18] : L3_out[18*5-19:18*5-36] ;
-    assign L4_in_w[17*6-18:17*k-34]   = ((IPV == 4'd3)||(IPV == 4'd5)||(IPV == 4'd6)||(IPV == 4'd7))? L3_out[18*5-37:18*5-54]: 18'b0                   ; 
-    assign L4_in_w[17*6-35:17*k-51]   = (IPV == 4'd7)                                               ? L3_out[18*5-55:18*5-72]: 18'b0                   ;
+    //pass IPV to Map_table_L4                                     
+    assign IPV_out = IPV_in;
+    //input to ALU_L4
+    assign L4_in   = L4_in_r;
 
-    assign L4_in_w[17*6-52:17*k-68]   = ((IPV == 4'd3)||(IPV == 4'd5)||(IPV == 4'd6))               ? L3_out[18*5-55:18*5-72]: 
-                                        (IPV == 4'd1)                                               ? L3_out[18*5-19:18*5-36]:
-                                        (IPV == 4'd2)                                               ? L3_out[18*5-37:18*5-54]:
-                                        (IPV == 4'd4)                                               ? L3_out[18*5-1:18*5-18] : 
-                                        (IPV == 4'd7)                                               ? L3_out[18*5-73:0]      : 18'b0                   ;  
-                                        
-    assign IPV_out = IPV_r;
+    //Match in/out
+    assign L4_in_w[18*4-1:18*4-18]    = ((IPV_in == 4'd0)||(IPV_in == 4'd1))                           ? L3_out[18*5-1:18*5-18] : L3_out[18*5-19:18*5-36] ;
+    assign L4_in_w[18*4-19:18*4-36]   = ((IPV_in == 4'd3)||(IPV_in == 4'd5)||(IPV_in == 4'd6)||(IPV_in == 4'd7))? L3_out[18*5-37:18*5-54]: (18'b0)        ; 
+    assign L4_in_w[18*4-37:18*4-54]   = (IPV_in == 4'd7)                                               ? L3_out[18*5-55:18*5-72]: (18'b0)                 ;
+
+    assign L4_in_w[18*4-55:0]         = ((IPV_in == 4'd3)||(IPV_in == 4'd5)||(IPV_in == 4'd6))         ? L3_out[18*5-55:18*5-72]: 
+                                        (IPV_in == 4'd1)                                               ? L3_out[18*5-19:18*5-36]:
+                                        (IPV_in == 4'd2)                                               ? L3_out[18*5-37:18*5-54]:
+                                        (IPV_in == 4'd4)                                               ? L3_out[18*5-1:18*5-18] : 
+                                        (IPV_in == 4'd7)                                               ? L3_out[18*5-73:0]      : (18'b0)                 ;  
     /* ================ Sequencial ================ */
     always @(posedge clk) begin
         if (~rst) begin
@@ -238,3 +266,157 @@ module MPT4_L3 #(parameter k = 4)(
         end
     end
 endmodule
+
+
+
+//ALU_level_4
+module ALU_L4 #(parameter k = 4)(
+              ones,
+              IPV_in,
+              AAC_L,
+              AAC_R,
+              L4_in,
+              L4_out,
+              en,
+              out_valid
+    );
+    /* ==================== IO ==================== */
+    input  [4:0]      ones;
+    input  [3:0]      IPV_in;
+    input signed [27:0] AAC_L,AAC_R;
+    input  [18*4-1:0] L4_in  ;
+    output [28*4-1:0] L4_out ;
+    input             en;
+    output            out_valid;
+    /* ================= WIRE/REG ================= */
+    wire signed [27:0] L4_1,L4_2,L4_3,L4_4;
+    reg  [27:0] L4_out2_r,L4_out3_r;
+    wire [27:0] L4_out2_w,L4_out3_w;
+    reg  [3:0] counter_r,counter_w;
+    /* ================== Conti =================== */
+    //deco L4_in
+    assign L4_1 = ((counter_r==4'b5)&&(IPV_in==1'b0))?L4_in[18*4-55:0]:L4_in[18*4-1:18*4-18]  ;
+    assign L4_2 = L4_in[18*4-19:18*4-36] ;
+    assign L4_3 = L4_in[18*4-37:18*4-54] ;
+    assign L4_4 = ((counter_r==4'b5)&&(IPV_in==1'b1))?L4_in[18*4-1:18*4-18]:L4_in[18*4-55:0]  ;
+    //deco output 
+    assign L4_out[28*4-1:28*4-28]   = AAC_L; 
+    assign L4_out[28*4-29:28*4-56]  = (ones==5'b2)?AAC_R:L4_out2_r; 
+    assign L4_out[28*4-57:28*4-84]  = (ones==5'b3)?AAC_R:L4_out3_r; 
+    assign L4_out[28*4-85:0]        = AAC_R;  
+    //delay 
+    assign L4_out2_w = {10{L4_2[17]},L4_2};
+    assign L4_out3_w = {10{L4_3[17]},L4_3}; 
+
+    //output is ready
+    assign out_valid == (counter_r==4'b5)?1'b1:1'b0;
+
+    /* ================ Combination =============== */
+    always @(*) begin
+        counter_w = counter_r;
+        if (en && (counter_r==4'b0)) counter_w = 4'b1;
+        else if ((counter_r>=4'b1)&&(counter_r<4'b5)) counter_w = counter_r + 4'b1;
+        else if (counter_r==4'b5)    counter_w = 4'b0;
+    end
+    
+
+
+
+    /* ================ Sequencial ================ */
+    always @(posedge clk) begin
+        if (~rst) begin
+            L4_out2_r <= {28{1'b0}}; 
+            L4_out3_r <= {28{1'b0}};
+            counter_r <= 4'b0;
+        end 
+        else begin
+            L4_out2_r <= L4_out2_w; 
+            L4_out3_r <= L4_out3_w;
+            counter_r <= counter_w;
+        end
+    end
+
+endmodule
+
+
+
+
+
+
+
+
+/*
+
+
+// inter connect
+// alu
+reg           alu_l1_en ;
+reg [8*k-1:0] alu_mat_in;
+reg [8*k-1:0] alu_vec_in;
+reg [16*k-1:0]alu_l1_out;
+reg [32*k-1:0]alu_l2_in ;
+reg [17*6-1:0]alu_l2_out;
+reg [17*6-1:0]alu_l3_in ;
+reg [18*5-1:0]alu_l3_out;
+reg [18*4-1:0]alu_l4_in ;
+
+
+//Map_table
+reg [3:0] IPV_l1_in ;
+reg [3:0] IPV_l1_out;
+reg [3:0] IPV_l2_out;
+reg [3:0] IPV_l3_out;
+//reg [3:0] IPV_l4_in ;
+//reg [3:0] IPV_l4_out;
+
+
+
+
+
+
+Map_table_L1 map_l1(
+  .clk(clk),
+  .rst(rst),
+  .en(alu_l1_en),
+  .IPV_in(IPV_l1_in),
+  .L1_out(alu_l1_out),
+  .L2_in(alu_l2_in),
+  .IPV_out(IPV_l1_out)    
+);
+Map_table_L2 map_l2(
+  .clk(clk),
+  .rst(rst),
+  .IPV_in(IPV_l1_out),
+  .L2_out(alu_l2_out),
+  .L3_in(alu_l3_in),
+  .IPV_out(IPV_l2_out)  
+);
+Map_table_L3 map_l3(
+  .clk(clk),
+  .rst(rst),
+  .IPV_in(IPV_l2_out),
+  .L3_out(alu_l3_out),
+  .L4_in(alu_l4_in),
+  .IPV_out(IPV_l3_out)  
+
+);
+//Map_table_L4 map_l4();
+
+ALU_L1 alu_l1(
+  .matrix_in(alu_mat_in),
+  .vector_in(alu_vec_in),
+  .L1_out(alu_l1_out),
+  .en(alu_l1_en)
+);
+ALU_L2 alu_l2(
+  .L2_in(alu_l2_in),
+  .L2_out(alu_l2_out) 
+);
+ALU_L3 alu_l3(
+  .L3_in(alu_l3_in),
+  .L3_out(alu_l3_out) 
+);
+//ALU_L4 alu_l4();
+
+
+*/
