@@ -118,11 +118,12 @@ ALU_L3 alu_l3(
   .L3_out(alu_l3_out)
 );
 ALU_L4 alu_l4(
+  .ones(vov),
+  .IPV_in(IPV_l3_out),
   .AAC_L(AAC_L),
   .AAC_R(AAC_R),
   .L4_in(alu_l4_in),
   .L4_out(alu_l4_out),
-  .ones(vov),
   .en(alu_l1_en),
   .out_valid(alu_out_valid)
 );
