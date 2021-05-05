@@ -6,6 +6,12 @@
 cd [the folder you want the repo to be]
 git clone https://github.com/JeterHwang/ICEXP-final-project.git 
 ```
+## Source Command
+```
+>	source /usr/cad/cadence/cshrc
+>	source /usr/cad/synopsys/CIC/verdi.cshrc
+>	source /usr/cad/synopsys/CIC/synthesis.cshrc
+```
 
 ## File structure
 ```

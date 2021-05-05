@@ -51,10 +51,13 @@ def solve(matrix):
         for j in range(4 * i, 4 * (i + 1)):
             if ipv[j] == 1:
                 cnt1 = cnt1 + 1
+        VOV = ''
         for j in range(cnt1):
-            vov.append(1)
+            VOV = VOV + '1'
         for j in range(4 - cnt1):
-            vov.append(0)
+            VOV = VOV + '0'
+        
+        vov.append(VOV)
 
     return np.array(mat), np.array(col), np.array(ipv), np.array(vov)
 
@@ -65,7 +68,7 @@ def writeData(vecotr, matrix, column, ipv, vov):
     np.savetxt(matrix_path, matrix.astype(int), fmt='%d')
     np.savetxt(columnIndex_path, column.astype(int), fmt='%d')
     np.savetxt(ipv_path, ipv.astype(int), fmt='%d')
-    np.savetxt(vov_path, vov.astype(int), fmt='%d')
+    np.savetxt(vov_path, vov, fmt='%s')
 
 if __name__ == '__main__':
     matrix = generate_matrix()

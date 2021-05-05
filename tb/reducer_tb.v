@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 `define CYCLE 10
 `define HCYCLE 5
-`define ENDCYCLE 1000
+`define ENDCYCLE 100000
 `define dataIn "dat/ipv_in.dat"
 `define golden  "dat/vov_out.dat"  
 
@@ -21,7 +21,7 @@ module reducer_tb;
 
     IPV_reducer #(.k(k)) reducer(
         .clk(clk),
-        .reset_n(reset_n),
+        .rst_n(reset_n),
         .ipv_in(ipv_in),
         .vov(vov)
     );
@@ -29,8 +29,8 @@ module reducer_tb;
     always #(`HCYCLE) clk = ~clk;
 
     initial begin
-        $fsdbDumpfile("aac.fsdb");            
-        $fsdbDumpvars(0,aac_tb,"+mda");
+        $fsdbDumpfile("reducer.fsdb");            
+        $fsdbDumpvars(0,reducer_tb,"+mda");
 
         data    = $fopen(`dataIn, "r");
         ans  = $fopen(`golden, "r");
@@ -42,24 +42,24 @@ module reducer_tb;
         clk = 0;
         reset_n = 1;
         #(`CYCLE) reset_n = 0;
-        #(2 * `CYCLE) begin
+        #(1 * `CYCLE) begin
             reset_n = 1;   
         end
         
         err_num = 0;
-        for(i = 0; i < 20; i = i + 1) begin
+        for(i = 0; i < 8216; i = i + 1) begin
             @(negedge clk) begin
                 $fscanf(data, "%b\n", ipv_in); 
                 if ($feof(data)) begin
                     $display("Reach end of file :( ");
                 end
                 
-                if((i - 3) % k == 0) begin
+                if(i > 2 && (i - 2) % k == 0) begin
                     $fscanf(ans, "%b\n", golden);
                     if(golden !== vov) begin
                         if(err_num == 0) 
                             $display("Error !!");
-                        $display("Case %d: Expected %d, but got %d", i, golden, out);
+                        $display("Case %d: Expected %b, but got %b", i, golden, vov);
                         err_num = err_num + 1;
                     end    
                 end

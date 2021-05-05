@@ -4,7 +4,7 @@ module IPV_reducer
   input  clk,
   input  rst_n,
   input  ipv_in,
-  output [k-1:0] vov,
+  output [k-1:0] vov
 );
 
 ///////////////////////////////////////////
@@ -78,7 +78,7 @@ always @(posedge clk or negedge rst_n) begin
   end
   else begin
     counter <= next_counter;
-    for(j = 1; j < stall_cycle; j=j+1) begin
+    for(j = 0; j < stall_cycle; j=j+1) begin
       ipv_stall[j] <= next_ipv_stall[j];
     end
     ipv <= next_ipv;
