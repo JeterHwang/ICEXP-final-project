@@ -13,7 +13,7 @@ probability_matrix = np.array([0.025, 0.025, 0.025, 0.025, 0.025, 0.025, 0.025, 
                           0.025, 0.025, 0.025, 0.025, 0.025, 0.025, 0.025, 0.025, 0.025, 0.025])
 probability_vector = np.array([0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.0, 
                           0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05])
-array_size = 128
+array_size = 32
 
 def generate_matrix():
     return np.random.choice(data_range, (array_size, array_size), p=probability_matrix)
