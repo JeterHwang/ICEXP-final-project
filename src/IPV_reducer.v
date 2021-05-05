@@ -3,14 +3,14 @@ module IPV_reducer #(parameter k = 4)(
   input  rst_n,
   input  ipv_in,
   input  in_valid,
-  output [k-1:0] vov
+  output [3:0] vov
 );
 
 ///////////////////////////////////////////
 /////          parameter              /////
 ///////////////////////////////////////////
 
-parameter stall_cycle = 2;
+parameter stall_cycle = 4;
 
 ///////////////////////////////////////////
 /////          reg & wire             /////
@@ -38,12 +38,11 @@ always @(*) begin
     end
 
     if (counter == 0) begin
-      next_ipv[k-2:0] = 0;
-      next_ipv[k-1] = ipv_in;
+      next_ipv = ipv_in ? 4'b1 : 4'b0;
     end
     else begin
       if (ipv_in) begin
-        next_ipv = {1'b1, ipv[k-1:1]};
+        next_ipv = ipv+1;
       end
       else begin
         next_ipv = ipv;

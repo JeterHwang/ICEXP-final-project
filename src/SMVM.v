@@ -36,7 +36,6 @@ reg signed [7:0] val[0:k-1], next_val[0:k-1]; // k * value
 reg        [7:0] col[0:k-1], next_col[0:k-1]; // k * column index
 reg              ipv[0:k-1], next_ipv[0:k-1]; // k * ipv
 
-
 wire       col_idx;
 
 // inter connect
@@ -52,21 +51,27 @@ reg [18*5-1:0]alu_l3_out;
 reg [18*4-1:0]alu_l4_in ;
 reg [28*4-1:0]alu_l4_out;
 wire          alu_out_valid;
+
 //Map_table
 reg [3:0] IPV_l1_in ;
 reg [3:0] IPV_l1_out;
 reg [3:0] IPV_l2_out;
 reg [3:0] IPV_l3_out;
+
 //AAC
 reg       aac_valid_l,aac_valid_r;
 reg [27:0]AAC_L,AAC_R;
-
-
   
 // reducer
 reg  [k-1:0]   reducer_ipv_in;
 reg            reducer_in_valid;
-wire [k-1:0]   vov;
+wire [3:0]     vov;
+
+// output
+// buffer
+wire [27:0]   alu_out[0:k-1];
+reg  [13:0]   output_buffer[0:2*k-1], next_output_buffer[0:2*k-1];
+reg  [3:0]    output_count, next_output_count;
 
 ///////////////////////////////////////////
 /////           submodule             /////
@@ -117,6 +122,7 @@ ALU_L4 alu_l4(
   .AAC_R(AAC_R),
   .L4_in(alu_l4_in),
   .L4_out(alu_l4_out),
+  .ones(vov),
   .en(alu_l1_en),
   .out_valid(alu_out_valid)
 );
@@ -258,6 +264,53 @@ always @(*) begin
   end
 end
 
+// alu output logic
+integer n;
+for (n = 0; n < k; n=n+1) begin
+  assign alu_out[n] = alu_l4_out[28*(4-n)-1:28*(3-n)];
+end
+always @(*) begin
+  if (alu_out_valid) begin
+    for (n = 0; n < k; n=n+1) begin
+      next_output_buffer[2*n]   = alu_out[n][27:14];
+      next_output_buffer[2*n+1] = alu_out[n][13: 0];
+    end
+  end
+  else begin
+    next_output_buffer[2*k-1] = 0;
+    for (n = 0; n < 2*k-1; n=n+1) begin
+      next_output_buffer[n] = output_buffer[n+1];
+    end
+  end
+end
+
+// output logic
+always @(*) begin
+  if (alu_out_valid) begin
+    if (vov > 0) begin
+      next_output_count = vov*2-1;
+      out_valid = 1'b1;
+      data_out = alu_out[0][27:14];
+    end
+    else begin
+      next_output_count = 0;
+      out_valid = 1'b0;
+      data_out = 0;
+    end
+  end
+  else begin
+    if (output_count > 0) begin
+      out_valid = 1'b1;
+      next_output_count = output_count - 1;
+      data_out = output_buffer[0];
+    end
+    else begin
+      out_valid = 1'b0;
+      next_output_count = 0;
+      data_out = 0;
+    end
+  end
+end
 
 ///////////////////////////////////////////
 /////           sequential            /////
@@ -270,6 +323,7 @@ always@ (posedge clk or negedge rst_n) begin
     cols <= 0;
     input_count <= 0;
     vec_count <= 0;
+    output_count <= 0;
     for (i = 0; i < 128; i=i+1) begin
       vec[i] <= 0;
     end
@@ -282,6 +336,10 @@ always@ (posedge clk or negedge rst_n) begin
     for (i = 0; i < k; i=i+1) begin
       ipv[i] <= 0;
     end
+
+    for (i = 0; i < 2*k; i=i+1) begin
+      output_buffer[i] <= 0;
+    end
   end
   else begin
     state <= next_state;
@@ -289,6 +347,7 @@ always@ (posedge clk or negedge rst_n) begin
     cols <= next_cols;
     vec_count <= next_vec_count;
     input_count <= next_input_count;
+    output_count <= next_output_count;
     for (i = 0; i < 128; i=i+1) begin
       vec[i] <= next_vec[i];
     end
@@ -300,6 +359,10 @@ always@ (posedge clk or negedge rst_n) begin
     end
     for (i = 0; i < k; i=i+1) begin
       ipv[i] <= next_ipv[i];
+    end
+
+    for (i = 0; i < 2*k; i=i+1) begin
+      output_buffer[i] <= next_output_buffer[i];
     end
   end
 end
