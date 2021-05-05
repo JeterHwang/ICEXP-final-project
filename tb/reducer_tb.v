@@ -12,6 +12,7 @@ module reducer_tb;
     reg reset_n;
     reg ipv_in;
     reg [k-1:0] golden;
+    reg [15:0]  count; 
 
     wire [k-1:0] vov;
 
@@ -63,6 +64,7 @@ module reducer_tb;
                         err_num = err_num + 1;
                     end    
                 end
+                count = i;
             end
         end
 

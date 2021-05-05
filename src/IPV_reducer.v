@@ -1,6 +1,4 @@
-module IPV_reducer
-#(parameter k = 4)
-(
+module IPV_reducer #(parameter k = 4)(
   input  clk,
   input  rst_n,
   input  ipv_in,
@@ -11,7 +9,7 @@ module IPV_reducer
 /////          parameter              /////
 ///////////////////////////////////////////
 
-parameter stall_cycle = 3;
+parameter stall_cycle = 2;
 
 ///////////////////////////////////////////
 /////          reg & wire             /////
@@ -56,7 +54,7 @@ always @(*) begin
   for(i = 1; i < stall_cycle; i=i+1) begin
     next_ipv_stall[i] = ipv_stall[i-1];
   end
-  if (counter == k-1) begin
+  if (counter == 0) begin
     next_ipv_stall[0] = ipv;
   end
   else begin
