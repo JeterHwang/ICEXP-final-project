@@ -2,10 +2,10 @@ module SMVM(
   input         clk,
   input         rst_n,
   input  [7:0]  val_in,
-  input  [7:0]  col_in,
+  input  [2:0]  col_in,
   input         ipv_in,
   output        out_valid,
-  output [23:0] data_out,
+  output [13:0] data_out,
 );
 
 ///////////////////////////////////////////
@@ -16,9 +16,10 @@ parameter k = 4;
 // state
 parameter IDLE   = 3'b000;    // no op/ input shape
 parameter VEC_IN = 3'b001;    // input vector
-parameter MAT_IN = 3'b010;    // input matrix
-parameter CAL    = 3'b011;    // calculate
-parameter OUT    = 3'b100;    // output
+parameter VAL_IN = 3'b010;    // input matrix value
+parameter COL_IN = 3'b011;    // input matrix column index
+parameter CAL    = 3'b100;    // calculate
+parameter OUT    = 3'b101;    // output
 
 ///////////////////////////////////////////
 /////          reg & wire             /////
@@ -34,6 +35,9 @@ reg signed [7:0] vec[0:127], next_vec[0:127]; // save vector
 reg signed [7:0] val[0:k-1], next_val[0:k-1]; // k * value
 reg        [7:0] col[0:k-1], next_col[0:k-1]; // k * column index
 reg              ipv[0:k-1], next_ipv[0:k-1]; // k * ipv
+
+
+wire       col_idx;
 
 // inter connect
 // alu
@@ -62,6 +66,7 @@ reg [27:0]AAC_L,AAC_R;
   
 // reducer
 reg  [k-1:0]   reducer_ipv_in;
+reg            reducer_in_valid;
 wire [k-1:0]   vov;
 
 ///////////////////////////////////////////
@@ -117,11 +122,12 @@ ALU_L4 alu_l4(
   
   
   
-IPV_encoder encoder();
+// IPV_encoder encoder();
 IPV_reducer reducer(
   .clk(clk),
   .rst_n(rst_n),
   .ipv_in(reducer_ipv_in),
+  .in_valid(reducer_in_valid),
   .vov(vov)
 );
 
@@ -149,17 +155,20 @@ always @(*) begin
   case(state)
     IDLE   : next_state = val_in ? VEC_IN : IDLE;
     VEC_IN : begin
-      if (vec_count == cols-1) next_state = MAT_IN;
+      if (vec_count == cols-1) next_state = VAL_IN;
       else next_state = VEC_IN;
     end
-    MAT_IN : next_state = val_in ? MAT_IN : CAL;
+    VAL_IN : next_state = val_in ? COL_IN : CAL;
+    COL_IN : next_state = VAL_IN;
     CAL    : next_state = CAL;  // FIXME
     OUT    : next_state = IDLE; // FIXME
     default: next_state = IDLE; 
   endcase
 end
 
+
 // input logic
+assign col_idx = { val_in, ipv_in, col_in };
 integer j;
 always @(*) begin
   next_rows = rows;
@@ -194,7 +203,7 @@ always @(*) begin
       // value
       next_vec[vec_count] = data_in;
     end
-    MAT_IN: begin
+    VAL_IN: begin
       // state
       if (val_in) begin
         if (input_count == k-1) begin
@@ -211,9 +220,11 @@ always @(*) begin
       // value
       if (val_in) begin
         next_val[input_count] = val_in;
-        next_col[input_count] = col_in;
         next_ipv[input_count] = ipv_in;
       end
+    end
+    COL_IN: begin
+      next_col[input_count] = col_idx;
     end
     // CAL, OUT no input
   endcase
@@ -236,11 +247,13 @@ end
 
 // IPV reducer input logic
 always @(*) begin
-  if (state == MAT_IN) begin
+  if (state == VAL_IN) begin
     reducer_ipv_in = ipv_in;
+    reducer_in_valid = 1'b1;
   end
   else begin
     reducer_ipv_in = 0;
+    reducer_in_valid = 1'b0;
   end
 end
 
