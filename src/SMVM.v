@@ -67,7 +67,7 @@ wire [k-1:0]   vov;
 ///////////////////////////////////////////
 Map_table_L1 map_l1(
   .clk(clk),
-  .rst(rst),
+  .rst(rst_n),
   .en(alu_l1_en),
   .IPV_in(IPV_l1_in),
   .L1_out(alu_l1_out),
@@ -76,7 +76,7 @@ Map_table_L1 map_l1(
 );
 Map_table_L2 map_l2(
   .clk(clk),
-  .rst(rst),
+  .rst(rst_n),
   .IPV_in(IPV_l1_out),
   .L2_out(alu_l2_out),
   .L3_in(alu_l3_in),
@@ -84,7 +84,7 @@ Map_table_L2 map_l2(
 );
 Map_table_L3 map_l3(
   .clk(clk),
-  .rst(rst),
+  .rst(rst_n),
   .IPV_in(IPV_l2_out),
   .L3_out(alu_l3_out),
   .L4_in(alu_l4_in),
@@ -123,8 +123,20 @@ IPV_reducer reducer(
   .vov(vov)
 );
 
-AAC aac_l();
-AAC aac_r();
+AAC aac_l(
+  .clk(clk), 
+  .reset_n(rst_n), 
+  .aac(), 
+  .A_i(), 
+  .out()
+);
+AAC aac_r(
+  .clk(clk), 
+  .reset_n(rst_n), 
+  .aac(), 
+  .A_i(), 
+  .out()
+);
 
 ///////////////////////////////////////////
 /////          combinational          /////
