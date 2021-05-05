@@ -17,11 +17,11 @@ git clone https://github.com/JeterHwang/ICEXP-final-project.git
 ## Pattern Generating
 1. generate data
 ```
-matrix_in.dat
-vector_in.dat
-ipv_in.dat
-vov_out.dat
-columnIndex_in.dat
+tb/dat/matrix_in.dat
+tb/dat/vector_in.dat
+tb/dat/ipv_in.dat
+tb/dat/columnIndex_in.dat
+tb/dat/vov_out.dat
 ```
 3. command 
 ```
