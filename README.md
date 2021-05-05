@@ -15,11 +15,19 @@ git clone https://github.com/JeterHwang/ICEXP-final-project.git
 ```
 
 ## Pattern Generating
+1. generate data
+```
+* matrix_in.dat
+* vector_in.dat
+* ipv_in.dat
+* vov_out.dat
+* columnIndex_in.dat
+```
+3. command 
 ```
 cd tb/python
 python3 generate.py
 ```
-### generate matrix_in.dat, vector_in.dat, ipv_in.dat, vov_out.dat, columnIndex_in.dat
 
 ## File structure
 ```
