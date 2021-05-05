@@ -14,14 +14,14 @@ probability_matrix = np.array([0.025, 0.025, 0.025, 0.025, 0.025, 0.025, 0.025, 
                           0.025, 0.025, 0.025, 0.025, 0.025, 0.025, 0.025, 0.025, 0.025, 0.025])
 probability_vector = np.array([0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.0, 
                           0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05])
-array_row = 32
-array_col = 32
+array_row = 1
+array_col = 16
 
 def generate_matrix():
     return np.random.choice(data_range, (array_row, array_col), p=probability_matrix)
 
 def generate_vector():
-    return np.random.choice(data_range, array_row, p=probability_vector)
+    return np.random.choice(data_range, array_col, p=probability_vector)
 
 def solve(matrix, vector):
     mat = []
@@ -72,8 +72,11 @@ def solve(matrix, vector):
             VOV = VOV + '0'
         
         vov.append(VOV)
-
     output = matrix.dot(vector)
+    print(matrix)
+    print(vector)
+    print(output)
+    
     ans = []
     for ele in output:
         ans.append(np.binary_repr(ele, width=28))
@@ -81,11 +84,9 @@ def solve(matrix, vector):
     vec = []
     for ele in vector:
         vec.append(np.binary_repr(ele, width=8))
-        
+
     return np.array(vec), np.array(mat), np.array(col), np.array(ipv), np.array(vov), np.array(ans)
 
-
-        
 def writeData(vector, matrix, column, ipv, vov, ans):
     np.savetxt(vector_path, vector, fmt='%s')
     np.savetxt(matrix_path, matrix, fmt='%s')

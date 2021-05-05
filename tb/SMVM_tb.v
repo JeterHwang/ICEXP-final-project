@@ -6,13 +6,13 @@
 `define dataIn2 "dat/matrix_in.dat"
 `define dataIn3 "dat/vector_in.dat"
 `define dataIn4 "dat/columnIndex_in.dat"
-`define golden  "dat/data_out.dat"  
+`define golden  "dat/data_out.dat" 
 
 module SMVM_tb;
     parameter k = 4;
-    parameter non_zero = 520;
-    parameter row = 32;
-    parameter col = 32;
+    parameter non_zero = 5;
+    parameter row = 1;
+    parameter col = 16;
 
     reg clk;
     reg reset_n;
