@@ -46,7 +46,7 @@ reg [17*6-1:0]alu_l2_out;
 reg [17*6-1:0]alu_l3_in ;
 reg [18*5-1:0]alu_l3_out;
 reg [18*4-1:0]alu_l4_in ;
-reg [24*4-1:0]alu_l4_out ;
+reg [28*4-1:0]alu_l4_out ;
 //Map_table
 reg [3:0] IPV_l1_in ;
 reg [3:0] IPV_l1_out;
@@ -54,7 +54,7 @@ reg [3:0] IPV_l2_out;
 reg [3:0] IPV_l3_out;
 //AAC
 reg       aac_valid_l,aac_valid_r;
-reg [23:0]AAC_L,AAC_R;
+reg [27:0]AAC_L,AAC_R;
 
   
   
@@ -129,14 +129,14 @@ AAC aac_l(
   .clk(clk), 
   .reset_n(rst_n), 
   .aac(aac_valid_l), 
-  .A_i({6{alu_l4_in[18*4-1]},alu_l4_in[18*4-1:18*4-18]}), 
+  .A_i({10{alu_l4_in[18*4-1]},alu_l4_in[18*4-1:18*4-18]}), 
   .out(AAC_L)
 );
 AAC aac_r(
   .clk(clk), 
   .reset_n(rst_n), 
   .aac(aac_valid_r), 
-  .A_i({6{L4_in[18*4-55]},L4_in[18*4-55:0]}), 
+  .A_i({10{L4_in[18*4-55]},L4_in[18*4-55:0]}), 
   .out(AAC_R)
 );
 
