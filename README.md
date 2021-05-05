@@ -29,13 +29,20 @@ python3 generate.py
 |   +-- adderAccumulator.v
 |   +-- IPV_reducer.v
 |   +-- SMVM.v
+|   +-- ALU_maple.v
 +-- tb
 |   +-- aac_tb.v
 |   +-- reudcer_tb.v
+|   +-- ALU_tb.v
+|   +-- python
+|   |   +-- generate.py
 |   +-- dat
 |   |   +-- aac_ans.dat
 |   |   +-- aac_data1.dat
 |   |   +-- aac_data2.dat
+|   |   +-- columnIndex.dat
+|   |   +-- matrix_in.dat
+|   |   +-- vector_in.dat
 |   |   +-- ipv_in.dat
 |   |   +-- vov_out.dat
 ```
