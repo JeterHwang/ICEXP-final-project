@@ -271,6 +271,8 @@ endmodule
 
 //ALU_level_4
 module ALU_L4 #(parameter k = 4)(
+              clk,
+              rst,
               ones,
               IPV_in,
               AAC_L,
@@ -281,6 +283,8 @@ module ALU_L4 #(parameter k = 4)(
               out_valid
     );
     /* ==================== IO ==================== */
+    input             clk;
+    input             rst;
     input  [4:0]      ones;
     input  [3:0]      IPV_in;
     input signed [27:0] AAC_L,AAC_R;
@@ -295,28 +299,28 @@ module ALU_L4 #(parameter k = 4)(
     reg  [3:0] counter_r,counter_w;
     /* ================== Conti =================== */
     //deco L4_in
-    assign L4_1 = ((counter_r==4'b5)&&(IPV_in==1'b0))?L4_in[18*4-55:0]:L4_in[18*4-1:18*4-18]  ;
+    assign L4_1 = ((counter_r==4'd5)&&(IPV_in==1'b0))?L4_in[18*4-55:0]:L4_in[18*4-1:18*4-18]  ;
     assign L4_2 = L4_in[18*4-19:18*4-36] ;
     assign L4_3 = L4_in[18*4-37:18*4-54] ;
-    assign L4_4 = ((counter_r==4'b5)&&(IPV_in==1'b1))?L4_in[18*4-1:18*4-18]:L4_in[18*4-55:0]  ;
+    assign L4_4 = ((counter_r==4'd5)&&(IPV_in==1'b1))?L4_in[18*4-1:18*4-18]:L4_in[18*4-55:0]  ;
     //deco output 
     assign L4_out[28*4-1:28*4-28]   = AAC_L; 
-    assign L4_out[28*4-29:28*4-56]  = (ones==5'b2)?AAC_R:L4_out2_r; 
-    assign L4_out[28*4-57:28*4-84]  = (ones==5'b3)?AAC_R:L4_out3_r; 
+    assign L4_out[28*4-29:28*4-56]  = (ones==5'd2)?AAC_R:L4_out2_r; 
+    assign L4_out[28*4-57:28*4-84]  = (ones==5'd3)?AAC_R:L4_out3_r; 
     assign L4_out[28*4-85:0]        = AAC_R;  
     //delay 
-    assign L4_out2_w = {10{L4_2[17]},L4_2};
-    assign L4_out3_w = {10{L4_3[17]},L4_3}; 
+    assign L4_out2_w = {{10{L4_2[17]}},L4_2};
+    assign L4_out3_w = {{10{L4_3[17]}},L4_3}; 
 
     //output is ready
-    assign out_valid == (counter_r==4'b5)?1'b1:1'b0;
+    assign out_valid = (counter_r==4'd5)?1'b1:1'b0;
 
     /* ================ Combination =============== */
     always @(*) begin
         counter_w = counter_r;
         if (en && (counter_r==4'b0)) counter_w = 4'b1;
-        else if ((counter_r>=4'b1)&&(counter_r<4'b5)) counter_w = counter_r + 4'b1;
-        else if (counter_r==4'b5)    counter_w = 4'b0;
+        else if ((counter_r>=4'b1)&&(counter_r<4'd5)) counter_w = counter_r + 4'b1;
+        else if (counter_r==4'd5)    counter_w = 4'b0;
     end
     
 

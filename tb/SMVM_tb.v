@@ -75,7 +75,7 @@ module SMVM_tb;
     initial begin
         $fsdbDumpfile("top.fsdb");            
         $fsdbDumpvars(0, SMVM_tb,"+mda");
-        $readmemb(`golden, golden)
+        $readmemb(`golden, golden);
 
         ipv         = $fopen(`dataIn1, "r");
         matrix      = $fopen(`dataIn2, "r");

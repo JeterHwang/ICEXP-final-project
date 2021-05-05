@@ -1,4 +1,4 @@
-`include "ALU_maple.v"
+`include "../src/ALU_maple.v"
 module SMVM(
   input         clk,
   input         rst_n,
@@ -6,7 +6,7 @@ module SMVM(
   input  [2:0]  col_in,
   input         ipv_in,
   output        out_valid,
-  output [13:0] data_out,
+  output [13:0] data_out
 );
 
 ///////////////////////////////////////////
@@ -26,6 +26,12 @@ parameter OUT    = 3'b101;    // output
 /////          reg & wire             /////
 ///////////////////////////////////////////
 
+// inout
+reg       [13:0] data_o;
+reg              valid_o;
+assign out_valid = valid_o;
+assign data_out = data_o;
+
 // FFs
 reg        [3:0] state, next_state;
 reg        [7:0] vec_count, next_vec_count; // count vector input
@@ -41,27 +47,27 @@ wire       col_idx;
 
 // inter connect
 // alu
-reg           alu_l1_en ;
+wire           alu_l1_en ;
 reg [8*k-1:0] alu_mat_in;
 reg [8*k-1:0] alu_vec_in;
-reg [16*k-1:0]alu_l1_out;
-reg [32*k-1:0]alu_l2_in ;
-reg [17*6-1:0]alu_l2_out;
-reg [17*6-1:0]alu_l3_in ;
-reg [18*5-1:0]alu_l3_out;
-reg [18*4-1:0]alu_l4_in ;
-reg [28*4-1:0]alu_l4_out;
+wire [16*k-1:0]alu_l1_out;
+wire [32*k-1:0]alu_l2_in ;
+wire [17*6-1:0]alu_l2_out;
+wire [17*6-1:0]alu_l3_in ;
+wire [18*5-1:0]alu_l3_out;
+wire [18*4-1:0]alu_l4_in ;
+wire [28*4-1:0]alu_l4_out;
 wire          alu_out_valid;
 
 //Map_table
-reg [3:0] IPV_l1_in ;
-reg [3:0] IPV_l1_out;
-reg [3:0] IPV_l2_out;
-reg [3:0] IPV_l3_out;
+wire [3:0] IPV_l1_in ;
+wire [3:0] IPV_l1_out;
+wire [3:0] IPV_l2_out;
+wire [3:0] IPV_l3_out;
 
 //AAC
-reg       aac_valid_l,aac_valid_r;
-reg [27:0]AAC_L,AAC_R;
+wire       aac_valid_l,aac_valid_r;
+wire [27:0]AAC_L,AAC_R;
   
 // reducer
 reg  [k-1:0]   reducer_ipv_in;
@@ -70,7 +76,7 @@ wire [3:0]     vov;
 
 // output
 // buffer
-wire [27:0]   alu_out[0:k-1];
+reg  [27:0]   alu_out[0:k-1];
 reg  [13:0]   output_buffer[0:2*k-1], next_output_buffer[0:2*k-1];
 reg  [3:0]    output_count, next_output_count;
 
@@ -119,6 +125,8 @@ ALU_L3 alu_l3(
   .L3_out(alu_l3_out)
 );
 ALU_L4 alu_l4(
+  .clk(clk),
+  .rst(rst_n),
   .ones(vov),
   .IPV_in(IPV_l3_out),
   .AAC_L(AAC_L),
@@ -144,14 +152,14 @@ AAC aac_l(
   .clk(clk), 
   .reset_n(rst_n), 
   .aac(aac_valid_l), 
-  .A_i({10{alu_l4_in[18*4-1]},alu_l4_in[18*4-1:18*4-18]}), 
+  .A_i({{10{alu_l4_in[18*4-1]}}, alu_l4_in[18*4-1:18*4-18]}), 
   .out(AAC_L)
 );
 AAC aac_r(
   .clk(clk), 
   .reset_n(rst_n), 
   .aac(aac_valid_r), 
-  .A_i({10{L4_in[18*4-55]},L4_in[18*4-55:0]}), 
+  .A_i({{10{alu_l4_in[18*4-55]}},alu_l4_in[18*4-55:0]}), 
   .out(AAC_R)
 );
 
@@ -210,7 +218,7 @@ always @(*) begin
       else next_vec_count = vec_count + 1;
 
       // value
-      next_vec[vec_count] = data_in;
+      next_vec[vec_count] = val_in;
     end
     VAL_IN: begin
       // state
@@ -244,13 +252,13 @@ integer l;
 always @(*) begin
   if (input_count == k-1) begin
     for (l = 0; l < k; l=l+1) begin
-      alu_mat_in[8*(k-l)-1:8*(k-l+1)] = val[l];
-      alu_vec_in[8*(k-l)-1:8*(k-l+1)] = vec[col[l]];
+      alu_mat_in[8*(k-l)-1 -: 8] = val[l];
+      alu_vec_in[8*(k-l)-1 -: 8] = vec[col[l]];
     end
   end
   else begin
-    alu_mat_in = (8*k-1)'d0;
-    alu_vec_in = (8*k-1)'d0;
+    alu_mat_in = {(8*k-1){1'b0}};
+    alu_vec_in = {(8*k-1){1'b0}};
   end
 end
 
@@ -268,10 +276,10 @@ end
 
 // alu output logic
 integer n;
-for (n = 0; n < k; n=n+1) begin
-  assign alu_out[n] = alu_l4_out[28*(4-n)-1:28*(3-n)];
-end
 always @(*) begin
+  for (n = 0; n < k; n=n+1) begin
+    alu_out[n] = alu_l4_out[28*(4-n)-1 -:28];
+  end
   if (alu_out_valid) begin
     for (n = 0; n < k; n=n+1) begin
       next_output_buffer[2*n]   = alu_out[n][27:14];
@@ -291,25 +299,25 @@ always @(*) begin
   if (alu_out_valid) begin
     if (vov > 0) begin
       next_output_count = vov*2-1;
-      out_valid = 1'b1;
-      data_out = alu_out[0][27:14];
+      valid_o = 1'b1;
+      data_o = alu_out[0][27:14];
     end
     else begin
       next_output_count = 0;
-      out_valid = 1'b0;
-      data_out = 0;
+      valid_o = 1'b0;
+      data_o = 0;
     end
   end
   else begin
     if (output_count > 0) begin
-      out_valid = 1'b1;
+      valid_o = 1'b1;
       next_output_count = output_count - 1;
-      data_out = output_buffer[0];
+      data_o = output_buffer[0];
     end
     else begin
-      out_valid = 1'b0;
+      valid_o = 1'b0;
       next_output_count = 0;
-      data_out = 0;
+      data_o = 0;
     end
   end
 end
