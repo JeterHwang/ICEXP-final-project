@@ -50,7 +50,8 @@ reg [17*6-1:0]alu_l2_out;
 reg [17*6-1:0]alu_l3_in ;
 reg [18*5-1:0]alu_l3_out;
 reg [18*4-1:0]alu_l4_in ;
-reg [28*4-1:0]alu_l4_out ;
+reg [28*4-1:0]alu_l4_out;
+wire          alu_out_valid;
 //Map_table
 reg [3:0] IPV_l1_in ;
 reg [3:0] IPV_l1_out;
@@ -60,9 +61,7 @@ reg [3:0] IPV_l3_out;
 reg       aac_valid_l,aac_valid_r;
 reg [27:0]AAC_L,AAC_R;
 
-  
-  
-  
+
   
 // reducer
 reg  [k-1:0]   reducer_ipv_in;
@@ -111,13 +110,15 @@ ALU_L2 alu_l2(
 );
 ALU_L3 alu_l3(
   .L3_in(alu_l3_in),
-  .L3_out(alu_l3_out) 
+  .L3_out(alu_l3_out)
 );
 ALU_L4 alu_l4(
   .AAC_L(AAC_L),
   .AAC_R(AAC_R),
   .L4_in(alu_l4_in),
-  .L4_out(alu_l4_out) 
+  .L4_out(alu_l4_out),
+  .en(alu_l1_en),
+  .out_valid(alu_out_valid)
 );
   
   
