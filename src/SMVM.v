@@ -37,11 +37,26 @@ reg              ipv[0:k-1], next_ipv[0:k-1]; // k * ipv
 
 // inter connect
 // alu
+reg           alu_l1_en ;
 reg [8*k-1:0] alu_mat_in;
 reg [8*k-1:0] alu_vec_in;
-reg [15:0]    alu_l1_out;
-reg           alu_l1_en;
+reg [16*k-1:0]alu_l1_out;
+reg [32*k-1:0]alu_l2_in ;
+reg [17*6-1:0]alu_l2_out;
+reg [17*6-1:0]alu_l3_in ;
+reg [18*5-1:0]alu_l3_out;
+reg [18*4-1:0]alu_l4_in ;
+//Map_table
+reg [3:0] IPV_l1_in ;
+reg [3:0] IPV_l1_out;
+reg [3:0] IPV_l2_out;
+reg [3:0] IPV_l3_out;
 
+
+  
+  
+  
+  
 // reducer
 reg  [k-1:0]   reducer_ipv_in;
 wire [k-1:0]   vov;
@@ -49,10 +64,32 @@ wire [k-1:0]   vov;
 ///////////////////////////////////////////
 /////           submodule             /////
 ///////////////////////////////////////////
-Map_table_L1 map_l1();
-Map_table_L2 map_l2();
-Map_table_L3 map_l3();
-Map_table_L4 map_l4();
+Map_table_L1 map_l1(
+  .clk(clk),
+  .rst(rst),
+  .en(alu_l1_en),
+  .IPV_in(IPV_l1_in),
+  .L1_out(alu_l1_out),
+  .L2_in(alu_l2_in),
+  .IPV_out(IPV_l1_out)    
+);
+Map_table_L2 map_l2(
+  .clk(clk),
+  .rst(rst),
+  .IPV_in(IPV_l1_out),
+  .L2_out(alu_l2_out),
+  .L3_in(alu_l3_in),
+  .IPV_out(IPV_l2_out)  
+);
+Map_table_L3 map_l3(
+  .clk(clk),
+  .rst(rst),
+  .IPV_in(IPV_l2_out),
+  .L3_out(alu_l3_out),
+  .L4_in(alu_l4_in),
+  .IPV_out(IPV_l3_out)  
+
+);
 
 ALU_L1 alu_l1(
   .matrix_in(alu_mat_in),
@@ -60,10 +97,18 @@ ALU_L1 alu_l1(
   .L1_out(alu_l1_out),
   .en(alu_l1_en)
 );
-ALU_L2 alu_l2();
-ALU_L3 alu_l3();
-ALU_L4 alu_l4();
-
+ALU_L2 alu_l2(
+  .L2_in(alu_l2_in),
+  .L2_out(alu_l2_out) 
+);
+ALU_L3 alu_l3(
+  .L3_in(alu_l3_in),
+  .L3_out(alu_l3_out) 
+);
+//ALU_L4 alu_l4();
+  
+  
+  
 IPV_encoder encoder();
 IPV_reducer reducer(
   .clk(clk),
