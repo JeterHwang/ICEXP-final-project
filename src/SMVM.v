@@ -1,4 +1,5 @@
 `include "../src/ALU_maple.v"
+`include "../src/IPV_reducer.v"
 module SMVM(
   input         clk,
   input         rst_n,

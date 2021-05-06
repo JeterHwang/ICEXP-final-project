@@ -1,7 +1,8 @@
 `timescale 1ns/1ps
+`include "../src/SMVM.v"
 `define CYCLE 10
 `define HCYCLE 5
-`define ENDCYCLE 100000
+`define ENDCYCLE 1000
 `define dataIn1 "dat/ipv_in.dat"
 `define dataIn2 "dat/matrix_in.dat"
 `define dataIn3 "dat/vector_in.dat"
@@ -10,15 +11,15 @@
 
 module SMVM_tb;
     parameter k = 4;
-    parameter non_zero = 5;
-    parameter row = 1;
-    parameter col = 16;
+    parameter non_zero = 8;
+    parameter row = 12'd1;
+    parameter col = 12'd16;
 
     reg clk;
     reg reset_n;
     
     reg ipv_val;
-    reg signed [7:0] matrix_val;
+    reg [7:0] matrix_val;
     reg [11:0] column_index;
 
     reg ipv_in;
@@ -26,7 +27,7 @@ module SMVM_tb;
     reg [2:0] col_in;
 
     wire out_valid;
-    wire signed [13:0] data_out;
+    wire [13:0] data_out;
 
     reg [27:0] golden [0:row-1];
     reg [13:0] H_golden; 
@@ -96,8 +97,14 @@ module SMVM_tb;
         
         err_num = 0;
         @(posedge clk) begin
-            val_in = row;
-            col_in = col;
+            val_in = row[11:4];
+            ipv_in = row[3];
+            col_in = row[2:0];
+        end
+        @(posedge clk) begin
+            val_in = col[11:4];
+            ipv_in = col[3];
+            col_in = col[2:0];
         end
         for(i = 0 ; i < col; i = i + 1) begin
             @(posedge clk) begin
@@ -106,14 +113,14 @@ module SMVM_tb;
         end
             
         for(i = 0; i < non_zero; i = i + 1) begin
-            @(posedge clk) begin
+            @(posedge clk) begin // value / ipv input 
                 $fscanf(matrix, "%b\n", matrix_val); 
                 $fscanf(columnIndex, "%b\n", column_index);
                 $fscanf(ipv, "%b\n", ipv_val);
                 ipv_in = ipv_val;
                 val_in = matrix_val[7:0];
             end 
-            @(posedge clk) begin
+            @(posedge clk) begin // columnIndex input 
                 val_in = column_index[11:4];
                 ipv_in = column_index[3];
                 col_in = column_index[2:0];

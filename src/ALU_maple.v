@@ -1,4 +1,5 @@
 //ALU_level_1
+`include "../src/adderAccumulator.v"
 module ALU_L1 #(parameter k = 4)(
               matrix_in,
               vector_in,
