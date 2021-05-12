@@ -208,7 +208,7 @@ always @(*) begin
   case(state)
     IDLE: begin
       if (val_in) begin
-        next_rows = val_in;
+        next_rows = col_idx;
       end
       else begin
         next_rows = 0;
@@ -216,7 +216,7 @@ always @(*) begin
       end
     end
     COL_IN: begin
-      next_cols = col_in;
+      next_cols = col_idx;
     end
     VEC_IN: begin
       // state
