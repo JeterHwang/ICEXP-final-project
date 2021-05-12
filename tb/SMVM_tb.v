@@ -25,6 +25,7 @@ module SMVM_tb;
     reg ipv_in;
     reg [7:0] val_in;
     reg [2:0] col_in;
+    reg in_valid;
 
     wire out_valid;
     wire [13:0] data_out;
@@ -43,6 +44,7 @@ module SMVM_tb;
         .val_in(val_in),
         .col_in(col_in),
         .ipv_in(ipv_in),
+        .in_valid(in_valid),
         .out_valid(out_valid),
         .data_out(data_out)
     );
@@ -97,6 +99,7 @@ module SMVM_tb;
         
         err_num = 0;
         @(posedge clk) begin
+            in_valid = 1'b1;
             val_in = row[11:4];
             ipv_in = row[3];
             col_in = row[2:0];
@@ -120,12 +123,22 @@ module SMVM_tb;
                 ipv_in = ipv_val;
                 val_in = matrix_val[7:0];
             end 
-            @(posedge clk) begin // columnIndex input 
-                val_in = column_index[11:4];
-                ipv_in = column_index[3];
-                col_in = column_index[2:0];
+            if(i == non_zero - 1) begin // columnIndex input 
+                @(posedge clk) begin  // last input
+                    val_in = column_index[11:4];
+                    ipv_in = column_index[3];
+                    col_in = column_index[2:0];
+                    in_valid = 1'b0;  
+                end    
             end
-        end    
+            else begin
+                @(posedge clk) begin 
+                    val_in = column_index[11:4];
+                    ipv_in = column_index[3];
+                    col_in = column_index[2:0];
+                end    
+            end 
+        end  
     end
 
     initial begin
