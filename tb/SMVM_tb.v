@@ -11,7 +11,7 @@
 
 module SMVM_tb;
     parameter k = 4;
-    parameter non_zero = 8;
+    parameter non_zero = 12;
     parameter row = 12'd1;
     parameter col = 12'd16;
 
@@ -93,30 +93,30 @@ module SMVM_tb;
         clk = 0;
         reset_n = 1;
         #(`CYCLE) reset_n = 0;
-        #(1 * `CYCLE) begin
+        #(1.0 * `CYCLE) begin
             reset_n = 1;   
         end
         
         err_num = 0;
-        @(posedge clk) begin
+        @(negedge clk) begin
             in_valid = 1'b1;
             val_in = row[11:4];
             ipv_in = row[3];
             col_in = row[2:0];
         end
-        @(posedge clk) begin
+        @(negedge clk) begin
             val_in = col[11:4];
             ipv_in = col[3];
             col_in = col[2:0];
         end
         for(i = 0 ; i < col; i = i + 1) begin
-            @(posedge clk) begin
+            @(negedge clk) begin
                 $fscanf(vector, "%b\n", val_in);
             end
         end
             
         for(i = 0; i < non_zero; i = i + 1) begin
-            @(posedge clk) begin // value / ipv input 
+            @(negedge clk) begin // value / ipv input 
                 $fscanf(matrix, "%b\n", matrix_val); 
                 $fscanf(columnIndex, "%b\n", column_index);
                 $fscanf(ipv, "%b\n", ipv_val);
@@ -124,7 +124,7 @@ module SMVM_tb;
                 val_in = matrix_val[7:0];
             end 
             if(i == non_zero - 1) begin // columnIndex input 
-                @(posedge clk) begin  // last input
+                @(negedge clk) begin  // last input
                     val_in = column_index[11:4];
                     ipv_in = column_index[3];
                     col_in = column_index[2:0];
@@ -132,7 +132,7 @@ module SMVM_tb;
                 end    
             end
             else begin
-                @(posedge clk) begin 
+                @(negedge clk) begin 
                     val_in = column_index[11:4];
                     ipv_in = column_index[3];
                     col_in = column_index[2:0];
