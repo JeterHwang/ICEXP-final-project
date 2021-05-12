@@ -88,9 +88,11 @@ reg  [3:0]    output_count, next_output_count;
 ///////////////////////////////////////////
 /////           submodule             /////
 ///////////////////////////////////////////
-assign IPV_l1_in = ipv;
-assign alu_mat_in = {val[0], val[1], val[2], val[3]};
-assign alu_vec_in = {vec[0], vec[1], vec[2], vec[3]};
+assign IPV_l1_in = {ipv[0], ipv[1], ipv[2], ipv[3]};
+always @(*) begin
+  alu_mat_in = {val[0], val[1], val[2], val[3]};
+  alu_vec_in = {vec[0], vec[1], vec[2], vec[3]};
+end
 
 
 Map_table_L1 map_l1(
