@@ -6,6 +6,7 @@ module SMVM(
   input  [7:0]  val_in,
   input  [2:0]  col_in,
   input         ipv_in,
+  input         in_valid,
   output        out_valid,
   output [13:0] data_out
 );
@@ -180,13 +181,13 @@ AAC aac_r(
 // state logic
 always @(*) begin
   case(state)
-    IDLE   : next_state = val_in ? COL_IN : IDLE;
+    IDLE   : next_state = in_valid ? COL_IN : IDLE;
     COL_IN : next_state = VEC_IN;
     VEC_IN : begin
       if (vec_count == cols-1) next_state = VAL_IN;
       else next_state = VEC_IN;
     end
-    VAL_IN : next_state = val_in ? IDX_IN : CAL;
+    VAL_IN : next_state = in_valid ? IDX_IN : CAL;
     IDX_IN : next_state = VAL_IN;
     CAL    : next_state = CAL;  // FIXME
     OUT    : next_state = IDLE; // FIXME
@@ -235,7 +236,7 @@ always @(*) begin
     end
     VAL_IN: begin
       // state
-      if (val_in) begin
+      if (in_valid) begin
         if (input_count == k-1) begin
           next_input_count = 0;
         end
@@ -248,7 +249,7 @@ always @(*) begin
       end
 
       // value
-      if (val_in) begin
+      if (in_valid) begin
         next_val[input_count] = val_in;
         next_ipv[input_count] = ipv_in;
       end
