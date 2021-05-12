@@ -217,7 +217,7 @@ always @(*) begin
   end
   case(state)
     IDLE: begin
-      if (val_in) begin
+      if (in_valid) begin
         next_rows = col_idx;
       end
       else begin
