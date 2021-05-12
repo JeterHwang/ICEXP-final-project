@@ -16,27 +16,30 @@ module SMVM(
 parameter k = 4;
 
 // state
-parameter IDLE   = 3'b000;    // no op/ input shape
-parameter VEC_IN = 3'b001;    // input vector
-parameter VAL_IN = 3'b010;    // input matrix value
-parameter COL_IN = 3'b011;    // input matrix column index
-parameter CAL    = 3'b100;    // calculate
-parameter OUT    = 3'b101;    // output
+parameter IDLE   = 3'b000;    // no op/ input rows
+parameter COL_IN = 3'b001;
+parameter VEC_IN = 3'b010;    // input vector
+parameter VAL_IN = 3'b011;    // input matrix value
+parameter IDX_IN = 3'b100;    // input matrix column index
+parameter CAL    = 3'b101;    // calculate
+parameter OUT    = 3'b110;    // output
 
 ///////////////////////////////////////////
 /////          reg & wire             /////
 ///////////////////////////////////////////
 
 // inout
-reg       [13:0] data_o;
-reg              valid_o;
+reg  [13:0] data_o;
+reg         valid_o;
+wire [11:0] col_idx;
 assign out_valid = valid_o;
 assign data_out = data_o;
+
 
 // FFs
 reg        [3:0] state, next_state;
 reg        [7:0] vec_count, next_vec_count; // count vector input
-reg        [2:0] input_count, next_input_count; // count to k and start operation
+reg        [2:0] input_count, next_input_count; // count to k and start operation // FIXME
 reg        [7:0] rows, next_rows;
 reg        [7:0] cols, next_cols;
 reg signed [7:0] vec[0:127], next_vec[0:127]; // save vector
@@ -44,31 +47,31 @@ reg signed [7:0] val[0:k-1], next_val[0:k-1]; // k * value
 reg        [7:0] col[0:k-1], next_col[0:k-1]; // k * column index
 reg              ipv[0:k-1], next_ipv[0:k-1]; // k * ipv
 
-wire       col_idx;
+
 
 // inter connect
 // alu
-wire           alu_l1_en ;
-reg [8*k-1:0] alu_mat_in;
-reg [8*k-1:0] alu_vec_in;
-wire [16*k-1:0]alu_l1_out;
-wire [32*k-1:0]alu_l2_in ;
-wire [17*6-1:0]alu_l2_out;
-wire [17*6-1:0]alu_l3_in ;
-wire [18*5-1:0]alu_l3_out;
-wire [18*4-1:0]alu_l4_in ;
-wire [28*4-1:0]alu_l4_out;
-wire          alu_out_valid;
+wire            alu_l1_en ;
+reg  [8*k-1:0]  alu_mat_in;
+reg  [8*k-1:0]  alu_vec_in;
+wire [16*k-1:0] alu_l1_out;
+wire [32*k-1:0] alu_l2_in ;
+wire [17*6-1:0] alu_l2_out;
+wire [17*6-1:0] alu_l3_in ;
+wire [18*5-1:0] alu_l3_out;
+wire [18*4-1:0] alu_l4_in ;
+wire [28*4-1:0] alu_l4_out;
+wire            alu_out_valid;
 
-//Map_table
+// Map_table
 wire [3:0] IPV_l1_in ;
 wire [3:0] IPV_l1_out;
 wire [3:0] IPV_l2_out;
 wire [3:0] IPV_l3_out;
 
-//AAC
-wire       aac_valid_l,aac_valid_r;
-wire [27:0]AAC_L,AAC_R;
+// AAC
+wire        aac_valid_l,aac_valid_r;
+wire [27:0] AAC_L,AAC_R;
   
 // reducer
 reg  [k-1:0]   reducer_ipv_in;
@@ -84,6 +87,11 @@ reg  [3:0]    output_count, next_output_count;
 ///////////////////////////////////////////
 /////           submodule             /////
 ///////////////////////////////////////////
+assign IPV_l1_in = ipv;
+assign alu_mat_in = {val[0], val[1], val[2], val[3]};
+assign alu_vec_in = {vec[0], vec[1], vec[2], vec[3]};
+
+
 Map_table_L1 map_l1(
   .clk(clk),
   .rst(rst_n),
@@ -115,6 +123,7 @@ ALU_L1 alu_l1(
   .matrix_in(alu_mat_in),
   .vector_in(alu_vec_in),
   .L1_out(alu_l1_out),
+  .IPV(IPV_l1_in),
   .en(alu_l1_en)
 );
 ALU_L2 alu_l2(
@@ -171,13 +180,14 @@ AAC aac_r(
 // state logic
 always @(*) begin
   case(state)
-    IDLE   : next_state = val_in ? VEC_IN : IDLE;
+    IDLE   : next_state = val_in ? COL_IN : IDLE;
+    COL_IN : next_state = VEC_IN;
     VEC_IN : begin
       if (vec_count == cols-1) next_state = VAL_IN;
       else next_state = VEC_IN;
     end
-    VAL_IN : next_state = val_in ? COL_IN : CAL;
-    COL_IN : next_state = VAL_IN;
+    VAL_IN : next_state = val_in ? IDX_IN : CAL;
+    IDX_IN : next_state = VAL_IN;
     CAL    : next_state = CAL;  // FIXME
     OUT    : next_state = IDLE; // FIXME
     default: next_state = IDLE; 
@@ -205,13 +215,15 @@ always @(*) begin
   case(state)
     IDLE: begin
       if (val_in) begin
-        next_rows = val_in;
-        next_cols = col_in;
+        next_rows = col_idx;
       end
       else begin
         next_rows = 0;
         next_rows = 0;
       end
+    end
+    COL_IN: begin
+      next_cols = col_idx;
     end
     VEC_IN: begin
       // state
@@ -241,7 +253,7 @@ always @(*) begin
         next_ipv[input_count] = ipv_in;
       end
     end
-    COL_IN: begin
+    IDX_IN: begin
       next_col[input_count] = col_idx;
     end
     // CAL, OUT no input

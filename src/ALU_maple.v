@@ -4,11 +4,13 @@ module ALU_L1 #(parameter k = 4)(
               matrix_in,
               vector_in,
               L1_out,
+              IPV,
               en         
     );
     /* ==================== IO ==================== */
     input         [8*k-1:0]  matrix_in ; 
     input         [8*k-1:0]  vector_in ; 
+    input         [k-1:0]    IPV       ;
     output        [16*k-1:0] L1_out    ;
     output                   en        ;
     /* ================= WIRE/REG ================= */
@@ -34,7 +36,7 @@ module ALU_L1 #(parameter k = 4)(
     assign L1_out[16*k-49:0]       = mat_4 * vec_4;
 
     //signal of ready to process the new 4 bits
-    assign en = (matrix_in[8*k-1:8*k-8] == 8'b0)? 1'b0 : 1'b1 ;
+    assign en = ((matrix_in[8*k-1:8*k-8] == 8'b0)&&(IPV == {k{1'b0}}))? 1'b0 : 1'b1 ;
 
 endmodule
 

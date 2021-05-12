@@ -57,26 +57,17 @@ def make_table(k, N):
                     i_B1            = i_B1 + 2
                     i_out_a         = i_out_a + 1
                     i_B2            = i_B2 + 1
-            
-            print(T)
-            print(S1)
-            print(S2)
-            print(B1)
-            print(B2)
-            
 
             i_in_s  = i_in_s + 2 * N[level] + k
             B1      = B2
             lB1     = i_B2
             S1      = S2
 
-            print(lB1)
-            print()
-            
     return T
 
 if __name__ == '__main__':
-    k = 4
+    k = 8
     N = generate_N(k)
-    print(N)
-    print(make_table(k, N))
+    table = make_table(k, N)
+    np.savetxt('../csv/maptable.csv', table, delimiter=',')
+    print(table)
