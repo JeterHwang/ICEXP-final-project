@@ -41,7 +41,8 @@ assign data_out = data_o;
 
 // FFs
 reg        [3:0] state, next_state;
-reg        [7:0] counter, next_counter; // counter for vector input / k / CAL state
+reg        [7:0] counter, next_counter; // counter for vector input / CAL state
+reg        [2:0] alu_in_counter, next_alu_in_counter; // count to k and send to ALU
 reg        [7:0] rows, next_rows;
 reg        [7:0] cols, next_cols;
 reg signed [7:0] vec[0:127], next_vec[0:127]; // save vector
@@ -89,17 +90,7 @@ reg  [3:0]    output_count, next_output_count;
 ///////////////////////////////////////////
 /////           submodule             /////
 ///////////////////////////////////////////
-assign IPV_l1_in = (counter == k-1) ? {ipv[0], ipv[1], ipv[2], ipv[3]} : 0;
-always @(*) begin
-  if (counter == k-1) begin
-    alu_mat_in = {val[0], val[1], val[2], val[3]};
-    alu_vec_in = {vec[0], vec[1], vec[2], vec[3]};
-  end
-  else begin
-    alu_mat_in = 0;
-    alu_vec_in = 0;
-  end
-end
+
 
 
 Map_table_L1 map_l1(
@@ -215,6 +206,7 @@ always @(*) begin
   next_rows = rows;
   next_cols = cols;
   next_counter = counter;
+  next_alu_in_counter = alu_in_counter;
   for (j = 0; j < 128; j=j+1) begin
     next_vec[j] = vec[j];
   end
@@ -248,25 +240,25 @@ always @(*) begin
     VAL_IN: begin
       // state
       if (in_valid) begin
-        if (counter == k-1) begin
-          next_counter = 0;
+        if (alu_in_counter == k-1) begin
+          next_alu_in_counter = 0;
         end
         else begin
-          next_counter = counter + 1;
+          next_alu_in_counter = alu_in_counter + 1;
         end
       end
       else begin
-        next_counter = 0;
+        next_alu_in_counter = 0;
       end
 
       // value
       if (in_valid) begin
-        next_val[counter] = val_in;
-        next_ipv[counter] = ipv_in;
+        next_val[alu_in_counter] = val_in;
+        next_ipv[alu_in_counter] = ipv_in;
       end
     end
     IDX_IN: begin
-      next_col[counter] = col_idx;
+      next_col[alu_in_counter] = col_idx;
     end
     CAL: begin
       if (counter == alu_stall_cycle) begin
@@ -281,9 +273,10 @@ always @(*) begin
 end
 
 // ALU L1 input logic
+assign IPV_l1_in = (alu_in_counter == k-1) ? {ipv[0], ipv[1], ipv[2], ipv[3]} : 0;
 integer l;
 always @(*) begin
-  if (counter == k-1) begin
+  if (alu_in_counter == k-1) begin
     for (l = 0; l < k; l=l+1) begin
       alu_mat_in[8*(k-l)-1 -: 8] = val[l];
       alu_vec_in[8*(k-l)-1 -: 8] = vec[col[l]];
@@ -366,6 +359,7 @@ always@ (posedge clk or negedge rst_n) begin
     rows <= 0;
     cols <= 0;
     counter <= 0;
+    alu_in_counter <= 0;
     output_count <= 0;
     for (i = 0; i < 128; i=i+1) begin
       vec[i] <= 0;
@@ -389,6 +383,7 @@ always@ (posedge clk or negedge rst_n) begin
     rows <= next_rows;
     cols <= next_cols;
     counter <= next_counter;
+    alu_in_counter <= next_alu_in_counter;
     output_count <= next_output_count;
     for (i = 0; i < 128; i=i+1) begin
       vec[i] <= next_vec[i];
