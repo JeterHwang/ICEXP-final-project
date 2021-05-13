@@ -34,7 +34,7 @@ parameter OUT    = 3'b110;    // output
 // inout
 reg  [13:0] data_o;
 reg         valid_o;
-wire [11:0] col_idx;
+wire [11:0] col_idx_concat;
 assign out_valid = valid_o;
 assign data_out = data_o;
 
@@ -46,8 +46,8 @@ reg        [2:0] alu_in_counter, next_alu_in_counter; // count to k and send to 
 reg        [7:0] rows, next_rows;
 reg        [7:0] cols, next_cols;
 reg signed [7:0] vec[0:127], next_vec[0:127]; // save vector
-reg signed [7:0] val[0:k-1], next_val[0:k-1]; // k * value
-reg        [7:0] col[0:k-1], next_col[0:k-1]; // k * column index
+reg signed [7:0] mat_val[0:k-1], next_mat_val[0:k-1]; // k * value
+reg        [7:0] col_idx[0:k-1], next_col_idx[0:k-1]; // k * column index
 reg              ipv[0:k-1], next_ipv[0:k-1]; // k * ipv
 
 
@@ -180,7 +180,7 @@ end
 
 
 // input logic
-assign col_idx = { val_in, ipv_in, col_in };
+assign col_idx_concat = { val_in, ipv_in, col_in };
 integer j;
 always @(*) begin
   next_rows = rows;
@@ -191,7 +191,10 @@ always @(*) begin
     next_vec[j] = vec[j];
   end
   for (j = 0; j < k; j=j+1) begin
-    next_val[j] = val[j];
+    next_mat_val[j] = mat_val[j];
+  end
+  for (j = 0; j < k; j=j+1) begin
+    next_col_idx[j] = col_idx[j];
   end
   for (j = 0; j < k; j=j+1) begin
     next_ipv[j] = ipv[j];
@@ -199,7 +202,7 @@ always @(*) begin
   case(state)
     IDLE: begin
       if (in_valid) begin
-        next_rows = col_idx;
+        next_rows = col_idx_concat;
       end
       else begin
         next_rows = 0;
@@ -207,7 +210,7 @@ always @(*) begin
       end
     end
     COL_IN: begin
-      next_cols = col_idx;
+      next_cols = col_idx_concat;
     end
     VEC_IN: begin
       // state
@@ -219,7 +222,7 @@ always @(*) begin
     end
     VAL_IN: begin
       if (in_valid) begin
-        next_val[alu_in_counter] = val_in;
+        next_mat_val[alu_in_counter] = val_in;
         next_ipv[alu_in_counter] = ipv_in;
       end
       else begin
@@ -233,7 +236,7 @@ always @(*) begin
       else begin
         next_alu_in_counter = alu_in_counter + 1;
       end
-      next_col[alu_in_counter] = col_idx;
+      next_col_idx[alu_in_counter] = col_idx_concat;
     end
     CAL: begin
       if (counter == alu_stall_cycle) begin
@@ -253,11 +256,11 @@ integer l;
 always @(*) begin
   if (alu_in_counter == k-1 && state == IDX_IN) begin
     for (l = 0; l < k-1; l=l+1) begin
-      alu_mat_in[8*(k-l)-1 -: 8] = val[l];
-      alu_vec_in[8*(k-l)-1 -: 8] = vec[col[l]];
+      alu_mat_in[8*(k-l)-1 -: 8] = mat_val[l];
+      alu_vec_in[8*(k-l)-1 -: 8] = vec[col_idx[l]];
     end
-    alu_mat_in[7:0] = val[k-1];
-    alu_vec_in[7:0] = vec[col_idx];
+    alu_mat_in[7:0] = mat_val[k-1];
+    alu_vec_in[7:0] = vec[col_idx_concat];
   end
   else begin
     alu_mat_in = {(8*k-1){1'b0}};
@@ -343,10 +346,10 @@ always@ (posedge clk or negedge rst_n) begin
       vec[i] <= 0;
     end
     for (i = 0; i < k; i=i+1) begin
-      val[i] <= 0;
+      mat_val[i] <= 0;
     end
     for (i = 0; i < k; i=i+1) begin
-      col[i] <= 0;
+      col_idx[i] <= 0;
     end
     for (i = 0; i < k; i=i+1) begin
       ipv[i] <= 0;
@@ -367,10 +370,10 @@ always@ (posedge clk or negedge rst_n) begin
       vec[i] <= next_vec[i];
     end
     for (i = 0; i < k; i=i+1) begin
-      val[i] <= next_val[i];
+      mat_val[i] <= next_mat_val[i];
     end
     for (i = 0; i < k; i=i+1) begin
-      col[i] <= next_col[i];
+      col_idx[i] <= next_col_idx[i];
     end
     for (i = 0; i < k; i=i+1) begin
       ipv[i] <= next_ipv[i];
