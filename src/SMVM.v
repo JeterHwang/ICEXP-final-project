@@ -159,6 +159,8 @@ IPV_reducer reducer(
   .vov(vov)
 );
 
+assign aac_valid_l == ~IPV_l3_out[0];
+assign aac_valid_l == 1'b0;
 AAC aac_l(
   .clk(clk), 
   .reset_n(rst_n), 
