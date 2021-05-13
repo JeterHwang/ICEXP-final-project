@@ -321,10 +321,11 @@ module ALU_L4 #(parameter k = 4)(
     assign aac_valid_l = ~IPV_in[0];
     assign aac_valid_r = 1'b0;
     //deco L4_in
-    assign L4_1 = ((counter_r==4'd5)&&(IPV_in[0]==1'b0)) ? L4_4 : L4_1;
+    assign L4_1 = ((counter_r==4'd5)&&(IPV_in[0]==1'b0)) ? AAC_R : 
+                (counter_r == 4'd3) ? {{10{L4_in[71]}}, L4_in[18*4-1:18*4-18]} : 28'd0;
     assign L4_2 = {{10{L4_in[53]}}, L4_in[18*4-19:18*4-36]} ;
     assign L4_3 = {{10{L4_in[35]}}, L4_in[18*4-37:18*4-54]} ;
-    assign L4_4 = {{10{L4_in[17]}}, L4_in[18*4-55:0]}  ;
+    assign L4_4 = (counter_r == 4'd3) ? {{10{L4_in[17]}}, L4_in[18*4-55:0]} : 28'd0;
     //assign L4_4 = ((counter_r==4'd5)&&(IPV_in[0]==1'b1))?L4_in[18*4-1:18*4-18]:L4_in[18*4-55:0]  ;
     //deco output 
     assign L4_out[28*4-1:28*4-28]   = AAC_L; 
