@@ -13,7 +13,7 @@ module AAC(clk, reset_n, aac, A_i, out);
     reg [13:0] WR_r, WR_w;
     reg carry_r, carry_w;
     
-    reg [13:0] LSB_adder_w;
+    reg [14:0] LSB_adder_w;
     reg [13:0] MSB_adder_w;
     reg [13:0] LZAB_w;
     reg [13:0] MZAB_w;

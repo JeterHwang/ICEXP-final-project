@@ -293,21 +293,6 @@ module ALU_L4 #(parameter k = 4)(
     input             en;
     output            out_valid;
 
-    AAC aac_l(
-        .clk(clk), 
-        .reset_n(rst_n), 
-        .aac(aac_valid_l), 
-        .A_i(L4_1), 
-        .out(AAC_L)
-    );
-    AAC aac_r(
-        .clk(clk), 
-        .reset_n(rst_n), 
-        .aac(aac_valid_r), 
-        .A_i(L4_4), 
-        .out(AAC_R)
-    );
-
     /* ================= WIRE/REG ================= */
     wire signed [27:0] L4_1,L4_2,L4_3,L4_4;
     
@@ -317,6 +302,23 @@ module ALU_L4 #(parameter k = 4)(
     reg  [27:0] L4_out2_r,L4_out3_r;
     wire [27:0] L4_out2_w,L4_out3_w;
     reg  [3:0] counter_r,counter_w;
+    
+    /* ================= Submodules =============== */
+    AAC aac_l(
+        .clk(clk), 
+        .reset_n(rst), 
+        .aac(aac_valid_l), 
+        .A_i(L4_1), 
+        .out(AAC_L)
+    );
+    AAC aac_r(
+        .clk(clk), 
+        .reset_n(rst), 
+        .aac(aac_valid_r), 
+        .A_i(L4_4), 
+        .out(AAC_R)
+    );
+
     /* ================== Conti =================== */
     assign aac_valid_l = ~IPV_in[0];
     assign aac_valid_r = 1'b0;
