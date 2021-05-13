@@ -278,8 +278,6 @@ module ALU_L4 #(parameter k = 4)(
               rst,
               ones,
               IPV_in,
-              AAC_L,
-              AAC_R,
               L4_in,
               L4_out,
               en,
@@ -290,22 +288,43 @@ module ALU_L4 #(parameter k = 4)(
     input             rst;
     input  [4:0]      ones;
     input  [3:0]      IPV_in;
-    input signed [27:0] AAC_L,AAC_R;
     input  [18*4-1:0] L4_in  ;
     output [28*4-1:0] L4_out ;
     input             en;
     output            out_valid;
+
+    AAC aac_l(
+        .clk(clk), 
+        .reset_n(rst_n), 
+        .aac(aac_valid_l), 
+        .A_i(L4_1), 
+        .out(AAC_L)
+    );
+    AAC aac_r(
+        .clk(clk), 
+        .reset_n(rst_n), 
+        .aac(aac_valid_r), 
+        .A_i(L4_4), 
+        .out(AAC_R)
+    );
+
     /* ================= WIRE/REG ================= */
     wire signed [27:0] L4_1,L4_2,L4_3,L4_4;
+    
+    wire signed [27:0] AAC_L,AAC_R;
+    wire aac_valid_l, aac_valid_r;
+    
     reg  [27:0] L4_out2_r,L4_out3_r;
     wire [27:0] L4_out2_w,L4_out3_w;
     reg  [3:0] counter_r,counter_w;
     /* ================== Conti =================== */
+    assign aac_valid_l = ~IPV_in[0];
+    assign aac_valid_r = 1'b0;
     //deco L4_in
-    assign L4_1 = ((counter_r==4'd5)&&(IPV_in[0]==1'b0))?L4_in[18*4-55:0]:L4_in[18*4-1:18*4-18]  ;
-    assign L4_2 = L4_in[18*4-19:18*4-36] ;
-    assign L4_3 = L4_in[18*4-37:18*4-54] ;
-    assign L4_4 = L4_in[18*4-55:0]  ;
+    assign L4_1 = ((counter_r==4'd5)&&(IPV_in[0]==1'b0)) ? L4_4 : L4_1;
+    assign L4_2 = {{10{L4_in[53]}}, L4_in[18*4-19:18*4-36]} ;
+    assign L4_3 = {{10{L4_in[35]}}, L4_in[18*4-37:18*4-54]} ;
+    assign L4_4 = {{10{L4_in[17]}}, L4_in[18*4-55:0]}  ;
     //assign L4_4 = ((counter_r==4'd5)&&(IPV_in[0]==1'b1))?L4_in[18*4-1:18*4-18]:L4_in[18*4-55:0]  ;
     //deco output 
     assign L4_out[28*4-1:28*4-28]   = AAC_L; 

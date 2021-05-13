@@ -71,10 +71,6 @@ wire [3:0] IPV_l1_in ;
 wire [3:0] IPV_l1_out;
 wire [3:0] IPV_l2_out;
 wire [3:0] IPV_l3_out;
-
-// AAC
-wire        aac_valid_l,aac_valid_r;
-wire [27:0] AAC_L,AAC_R;
   
 // reducer
 reg  [k-1:0]   reducer_ipv_in;
@@ -140,8 +136,6 @@ ALU_L4 alu_l4(
   .rst(rst_n),
   .ones(vov),
   .IPV_in(IPV_l3_out),
-  .AAC_L(AAC_L),
-  .AAC_R(AAC_R),
   .L4_in(alu_l4_in),
   .L4_out(alu_l4_out),
   .en(alu_l1_en),
@@ -159,22 +153,6 @@ IPV_reducer reducer(
   .vov(vov)
 );
 
-assign aac_valid_l = ~IPV_l3_out[0];
-assign aac_valid_r = 1'b0;
-AAC aac_l(
-  .clk(clk), 
-  .reset_n(rst_n), 
-  .aac(aac_valid_l), 
-  .A_i({{10{alu_l4_in[18*4-1]}}, alu_l4_in[18*4-1:18*4-18]}), 
-  .out(AAC_L)
-);
-AAC aac_r(
-  .clk(clk), 
-  .reset_n(rst_n), 
-  .aac(aac_valid_r), 
-  .A_i({{10{alu_l4_in[18*4-55]}},alu_l4_in[18*4-55:0]}), 
-  .out(AAC_R)
-);
 
 ///////////////////////////////////////////
 /////          combinational          /////
