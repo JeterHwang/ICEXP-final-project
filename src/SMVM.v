@@ -80,7 +80,7 @@ wire [3:0]     vov;
 // output
 // buffer
 reg  [27:0]   alu_out[0:k-1];
-reg  [13:0]   output_buffer[0:2*k-1], next_output_buffer[0:2*k-1];
+reg  [13:0]   output_buffer[0:2*k-2], next_output_buffer[0:2*k-2];
 reg  [3:0]    output_count, next_output_count;
 
 ///////////////////////////////////////////
@@ -281,13 +281,14 @@ end
 integer n;
 always @(*) begin
   for (n = 0; n < k; n=n+1) begin
-    alu_out[n] = alu_l4_out[28*(4-n)-1 -:28];
+    alu_out[n] = alu_l4_out[28*(4-n)-1 -: 28];
   end
   if (alu_out_valid) begin
-    for (n = 0; n < k; n=n+1) begin
-      next_output_buffer[2*n]   = alu_out[n][27:14];
-      next_output_buffer[2*n+1] = alu_out[n][13: 0];
+    for (n = 0; n < k-1; n=n+1) begin
+      next_output_buffer[2*n]   = alu_out[n][13: 0];
+      next_output_buffer[2*n+1] = alu_out[n+1][27:14];
     end
+    next_output_buffer[2*k-2] = alu_out[k-1][13:0];
   end
   else begin
     next_output_buffer[2*k-1] = 0;
