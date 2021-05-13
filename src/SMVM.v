@@ -89,10 +89,16 @@ reg  [3:0]    output_count, next_output_count;
 ///////////////////////////////////////////
 /////           submodule             /////
 ///////////////////////////////////////////
-assign IPV_l1_in = {ipv[0], ipv[1], ipv[2], ipv[3]};
+assign IPV_l1_in = (counter == k-1) ? {ipv[0], ipv[1], ipv[2], ipv[3]} : 0;
 always @(*) begin
-  alu_mat_in = {val[0], val[1], val[2], val[3]};
-  alu_vec_in = {vec[0], vec[1], vec[2], vec[3]};
+  if (counter == k-1) begin
+    alu_mat_in = {val[0], val[1], val[2], val[3]};
+    alu_vec_in = {vec[0], vec[1], vec[2], vec[3]};
+  end
+  else begin
+    alu_mat_in = 0;
+    alu_vec_in = 0;
+  end
 end
 
 
