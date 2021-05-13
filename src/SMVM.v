@@ -268,7 +268,7 @@ always @(*) begin
 end
 
 // ALU L1 input logic
-assign IPV_l1_in = (alu_in_counter == k-1) ? {ipv[0], ipv[1], ipv[2], ipv[3]} : 0;
+assign IPV_l1_in = (alu_in_counter == k-1 && state == IDX_IN) ? {ipv[0], ipv[1], ipv[2], ipv[3]} : {(k){1'b0}};
 integer l;
 always @(*) begin
   if (alu_in_counter == k-1 && state == IDX_IN) begin
