@@ -238,26 +238,21 @@ always @(*) begin
       next_vec[counter] = val_in;
     end
     VAL_IN: begin
-      // state
-      if (in_valid) begin
-        if (alu_in_counter == k-1) begin
-          next_alu_in_counter = 0;
-        end
-        else begin
-          next_alu_in_counter = alu_in_counter + 1;
-        end
-      end
-      else begin
-        next_alu_in_counter = 0;
-      end
-
-      // value
       if (in_valid) begin
         next_val[alu_in_counter] = val_in;
         next_ipv[alu_in_counter] = ipv_in;
       end
+      else begin
+        next_alu_in_counter = 0;
+      end
     end
     IDX_IN: begin
+      if (alu_in_counter == k-1) begin
+        next_alu_in_counter = 0;
+      end
+      else begin
+        next_alu_in_counter = alu_in_counter + 1;
+      end
       next_col[alu_in_counter] = col_idx;
     end
     CAL: begin
@@ -276,7 +271,7 @@ end
 assign IPV_l1_in = (alu_in_counter == k-1) ? {ipv[0], ipv[1], ipv[2], ipv[3]} : 0;
 integer l;
 always @(*) begin
-  if (alu_in_counter == k-1) begin
+  if (alu_in_counter == k-1 && state == IDX_IN) begin
     for (l = 0; l < k; l=l+1) begin
       alu_mat_in[8*(k-l)-1 -: 8] = val[l];
       alu_vec_in[8*(k-l)-1 -: 8] = vec[col[l]];
