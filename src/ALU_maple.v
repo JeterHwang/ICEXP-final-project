@@ -302,10 +302,11 @@ module ALU_L4 #(parameter k = 4)(
     reg  [3:0] counter_r,counter_w;
     /* ================== Conti =================== */
     //deco L4_in
-    assign L4_1 = ((counter_r==4'd5)&&(IPV_in==1'b0))?L4_in[18*4-55:0]:L4_in[18*4-1:18*4-18]  ;
+    assign L4_1 = ((counter_r==4'd5)&&(IPV_in[0]==1'b0))?L4_in[18*4-55:0]:L4_in[18*4-1:18*4-18]  ;
     assign L4_2 = L4_in[18*4-19:18*4-36] ;
     assign L4_3 = L4_in[18*4-37:18*4-54] ;
-    assign L4_4 = ((counter_r==4'd5)&&(IPV_in==1'b1))?L4_in[18*4-1:18*4-18]:L4_in[18*4-55:0]  ;
+    assign L4_4 = L4_in[18*4-55:0]  ;
+    //assign L4_4 = ((counter_r==4'd5)&&(IPV_in[0]==1'b1))?L4_in[18*4-1:18*4-18]:L4_in[18*4-55:0]  ;
     //deco output 
     assign L4_out[28*4-1:28*4-28]   = AAC_L; 
     assign L4_out[28*4-29:28*4-56]  = (ones==5'd2)?AAC_R:L4_out2_r; 
@@ -345,85 +346,3 @@ module ALU_L4 #(parameter k = 4)(
 
 endmodule
 
-
-
-
-
-
-
-
-/*
-
-
-// inter connect
-// alu
-reg           alu_l1_en ;
-reg [8*k-1:0] alu_mat_in;
-reg [8*k-1:0] alu_vec_in;
-reg [16*k-1:0]alu_l1_out;
-reg [32*k-1:0]alu_l2_in ;
-reg [17*6-1:0]alu_l2_out;
-reg [17*6-1:0]alu_l3_in ;
-reg [18*5-1:0]alu_l3_out;
-reg [18*4-1:0]alu_l4_in ;
-
-
-//Map_table
-reg [3:0] IPV_l1_in ;
-reg [3:0] IPV_l1_out;
-reg [3:0] IPV_l2_out;
-reg [3:0] IPV_l3_out;
-//reg [3:0] IPV_l4_in ;
-//reg [3:0] IPV_l4_out;
-
-
-
-
-
-
-Map_table_L1 map_l1(
-  .clk(clk),
-  .rst(rst),
-  .en(alu_l1_en),
-  .IPV_in(IPV_l1_in),
-  .L1_out(alu_l1_out),
-  .L2_in(alu_l2_in),
-  .IPV_out(IPV_l1_out)    
-);
-Map_table_L2 map_l2(
-  .clk(clk),
-  .rst(rst),
-  .IPV_in(IPV_l1_out),
-  .L2_out(alu_l2_out),
-  .L3_in(alu_l3_in),
-  .IPV_out(IPV_l2_out)  
-);
-Map_table_L3 map_l3(
-  .clk(clk),
-  .rst(rst),
-  .IPV_in(IPV_l2_out),
-  .L3_out(alu_l3_out),
-  .L4_in(alu_l4_in),
-  .IPV_out(IPV_l3_out)  
-
-);
-//Map_table_L4 map_l4();
-
-ALU_L1 alu_l1(
-  .matrix_in(alu_mat_in),
-  .vector_in(alu_vec_in),
-  .L1_out(alu_l1_out),
-  .en(alu_l1_en)
-);
-ALU_L2 alu_l2(
-  .L2_in(alu_l2_in),
-  .L2_out(alu_l2_out) 
-);
-ALU_L3 alu_l3(
-  .L3_in(alu_l3_in),
-  .L3_out(alu_l3_out) 
-);
-//ALU_L4 alu_l4();
-
-
-*/
