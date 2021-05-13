@@ -320,10 +320,10 @@ module ALU_L4 #(parameter k = 4)(
     );
 
     /* ================== Conti =================== */
-    assign aac_valid_l = ~IPV_in[0];
+    assign aac_valid_l = (counter_r == 4'd4 && IPV_in != 4'b0000) ? 1'b0 : 1'b1;
     assign aac_valid_r = 1'b0;
     //deco L4_in
-    assign L4_1 = ((counter_r==4'd5)&&(IPV_in[0]==1'b0)) ? AAC_R : 
+    assign L4_1 = ((counter_r==4'd4) && (IPV_in[0]==1'b0)) ? AAC_R : 
                 (counter_r == 4'd3) ? {{10{L4_in[71]}}, L4_in[18*4-1:18*4-18]} : 28'd0;
     assign L4_2 = {{10{L4_in[53]}}, L4_in[18*4-19:18*4-36]} ;
     assign L4_3 = {{10{L4_in[35]}}, L4_in[18*4-37:18*4-54]} ;
@@ -339,14 +339,14 @@ module ALU_L4 #(parameter k = 4)(
     assign L4_out3_w = {{10{L4_3[17]}},L4_3}; 
 
     //output is ready
-    assign out_valid = (counter_r==4'd5)?1'b1:1'b0;
+    assign out_valid = (counter_r==4'd4)?1'b1:1'b0;
 
     /* ================ Combination =============== */
     always @(*) begin
         counter_w = counter_r;
         if (en && (counter_r==4'b0)) counter_w = 4'b1;
-        else if ((counter_r>=4'b1)&&(counter_r<4'd5)) counter_w = counter_r + 4'b1;
-        else if (counter_r==4'd5)    counter_w = 4'b0;
+        else if ((counter_r>=4'b1)&&(counter_r<4'd4)) counter_w = counter_r + 4'b1;
+        else if (counter_r==4'd4)    counter_w = 4'b0;
     end
     
 

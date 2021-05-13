@@ -9,13 +9,13 @@ ipv_path = '../dat/ipv_in.dat'
 vov_path = '../dat/vov_out.dat'
 golden_path = '../dat/data_out.dat'
 
-data_range = np.array([-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-probability_matrix = np.array([0.025, 0.025, 0.025, 0.025, 0.025, 0.025, 0.025, 0.025, 0.025, 0.025, 0.5,
-                          0.025, 0.025, 0.025, 0.025, 0.025, 0.025, 0.025, 0.025, 0.025, 0.025])
-probability_vector = np.array([0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.0, 
-                          0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05])
-array_row = 1
-array_col = 16
+data_range = np.arange(-128, 128, 1)
+probability_matrix = np.array([0.5/255 for i in range(256)])
+probability_matrix[128] = 0.5
+probability_vector = np.array([1.0/256 for i in range(256)])
+
+array_row = 128
+array_col = 128
 
 def generate_matrix():
     return np.random.choice(data_range, (array_row, array_col), p=probability_matrix)
@@ -97,6 +97,7 @@ def writeData(vector, matrix, column, ipv, vov, ans):
     np.savetxt(golden_path, ans, fmt='%s')
 
 if __name__ == '__main__':
+    np.random.seed(0)
     matrix = generate_matrix()
     vector = generate_vector()
     vec, ele, col, ipv, vov, ans = solve(matrix, vector)

@@ -21,12 +21,12 @@ module AAC(clk, reset_n, aac, A_i, out);
     assign out = {MSB_adder_w, LAR_r};
 
     always @(*) begin
+        LZAB_w      = LAR_r & {14{aac}};
+        MZAB_w      = MAR_r & {14{AAC_r}};
+
         LSB_adder_w = {1'b0, A_i[13:0]} + {1'b0, LZAB_w};
         MSB_adder_w = WR_r + MZAB_w + carry_r;
 
-        LZAB_w      = LAR_r & {14{aac}};
-        MZAB_w      = MAR_r & {14{AAC_r}};
-        
         AAC_w       = aac;
         carry_w     = LSB_adder_w[14];
         MAR_w       = MSB_adder_w;

@@ -2,7 +2,7 @@
 `include "../src/SMVM.v"
 `define CYCLE 10
 `define HCYCLE 5
-`define ENDCYCLE 1000
+`define ENDCYCLE 1000000
 `define dataIn1 "dat/ipv_in.dat"
 `define dataIn2 "dat/matrix_in.dat"
 `define dataIn3 "dat/vector_in.dat"
@@ -11,9 +11,9 @@
 
 module SMVM_tb;
     parameter k = 4;
-    parameter non_zero = 12;
-    parameter row = 12'd1;
-    parameter col = 12'd16;
+    parameter non_zero = 8240;
+    parameter row = 12'd128;
+    parameter col = 12'd128;
 
     reg clk;
     reg reset_n;
@@ -54,18 +54,23 @@ module SMVM_tb;
     always @(negedge clk) begin
         if(out_valid) begin
             // decide golden
-            if(out_valid & 1) begin
-                H_golden <= golden[count >> 1][13:0];
+            if(count & 1) begin
+                H_golden = golden[count >> 1][13:0];
             end
             else begin
-                H_golden <= golden[count >> 1][27:14];
+                H_golden = golden[count >> 1][27:14];
             end
 
             // answer 
             if(H_golden !== data_out) begin
                 if(err_num === 0)
                     $display("Error!!\n");
-                $display("Case %d: got %14b while %14b expected!!\n", count, data_out, H_golden);
+                if(count & 1) begin
+                    $display("Case %d LSB: got %14b while %14b expected!!\n", (count >> 1), data_out, H_golden);    
+                end
+                else begin
+                    $display("Case %d MSB: got %14b while %14b expected!!\n", (count >> 1), data_out, H_golden);    
+                end
                 err_num <= err_num + 1;
             end
             count <= count + 1;
@@ -91,6 +96,7 @@ module SMVM_tb;
         end
 
         clk = 0;
+        count = 0;
         reset_n = 1;
         #(`CYCLE) reset_n = 0;
         #(1.0 * `CYCLE) begin
