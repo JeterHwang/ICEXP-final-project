@@ -15,6 +15,8 @@ module SMVM(
 /////          parameter              /////
 ///////////////////////////////////////////
 parameter k = 4;
+parameter alu_stall_cycle = 4;
+
 
 // state
 parameter IDLE   = 3'b000;    // no op/ input rows
@@ -39,8 +41,7 @@ assign data_out = data_o;
 
 // FFs
 reg        [3:0] state, next_state;
-reg        [7:0] vec_count, next_vec_count; // count vector input
-reg        [2:0] input_count, next_input_count; // count to k and start operation // FIXME
+reg        [7:0] counter, next_counter; // counter for vector input / k / CAL state
 reg        [7:0] rows, next_rows;
 reg        [7:0] cols, next_cols;
 reg signed [7:0] vec[0:127], next_vec[0:127]; // save vector
@@ -186,12 +187,15 @@ always @(*) begin
     IDLE   : next_state = in_valid ? COL_IN : IDLE;
     COL_IN : next_state = VEC_IN;
     VEC_IN : begin
-      if (vec_count == cols-1) next_state = VAL_IN;
+      if (counter == cols-1) next_state = VAL_IN;
       else next_state = VEC_IN;
     end
     VAL_IN : next_state = in_valid ? IDX_IN : CAL;
     IDX_IN : next_state = VAL_IN;
-    CAL    : next_state = CAL;  // FIXME
+    CAL    : begin
+      if (counter == alu_stall_cycle) next_state = OUT;
+      else next_state = CAL;
+    end
     OUT    : next_state = IDLE; // FIXME
     default: next_state = IDLE; 
   endcase
@@ -204,8 +208,7 @@ integer j;
 always @(*) begin
   next_rows = rows;
   next_cols = cols;
-  next_input_count = input_count;
-  next_vec_count = vec_count;
+  next_counter = counter;
   for (j = 0; j < 128; j=j+1) begin
     next_vec[j] = vec[j];
   end
@@ -230,34 +233,42 @@ always @(*) begin
     end
     VEC_IN: begin
       // state
-      if (vec_count == cols-1) next_vec_count = 0;
-      else next_vec_count = vec_count + 1;
+      if (counter == cols-1) next_counter = 0;
+      else next_counter = counter + 1;
 
       // value
-      next_vec[vec_count] = val_in;
+      next_vec[counter] = val_in;
     end
     VAL_IN: begin
       // state
       if (in_valid) begin
-        if (input_count == k-1) begin
-          next_input_count = 0;
+        if (counter == k-1) begin
+          next_counter = 0;
         end
         else begin
-          next_input_count = input_count + 1;
+          next_counter = counter + 1;
         end
       end
       else begin
-        next_input_count = 0;
+        next_counter = 0;
       end
 
       // value
       if (in_valid) begin
-        next_val[input_count] = val_in;
-        next_ipv[input_count] = ipv_in;
+        next_val[counter] = val_in;
+        next_ipv[counter] = ipv_in;
       end
     end
     IDX_IN: begin
-      next_col[input_count] = col_idx;
+      next_col[counter] = col_idx;
+    end
+    CAL: begin
+      if (counter == alu_stall_cycle) begin
+        next_counter = 0;
+      end
+      else begin
+        next_counter = counter + 1;
+      end
     end
     // CAL, OUT no input
   endcase
@@ -266,7 +277,7 @@ end
 // ALU L1 input logic
 integer l;
 always @(*) begin
-  if (input_count == k-1) begin
+  if (counter == k-1) begin
     for (l = 0; l < k; l=l+1) begin
       alu_mat_in[8*(k-l)-1 -: 8] = val[l];
       alu_vec_in[8*(k-l)-1 -: 8] = vec[col[l]];
@@ -290,7 +301,7 @@ always @(*) begin
   end
 end
 
-// alu output logic
+// alu output buffer
 integer n;
 always @(*) begin
   for (n = 0; n < k; n=n+1) begin
@@ -312,6 +323,7 @@ end
 
 // output logic
 always @(*) begin
+  next_output_count = output_count;
   if (alu_out_valid) begin
     if (vov > 0) begin
       next_output_count = vov*2-1;
@@ -347,8 +359,7 @@ always@ (posedge clk or negedge rst_n) begin
     state <= IDLE;
     rows <= 0;
     cols <= 0;
-    input_count <= 0;
-    vec_count <= 0;
+    counter <= 0;
     output_count <= 0;
     for (i = 0; i < 128; i=i+1) begin
       vec[i] <= 0;
@@ -371,8 +382,7 @@ always@ (posedge clk or negedge rst_n) begin
     state <= next_state;
     rows <= next_rows;
     cols <= next_cols;
-    vec_count <= next_vec_count;
-    input_count <= next_input_count;
+    counter <= next_counter;
     output_count <= next_output_count;
     for (i = 0; i < 128; i=i+1) begin
       vec[i] <= next_vec[i];
