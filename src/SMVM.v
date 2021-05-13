@@ -272,10 +272,12 @@ assign IPV_l1_in = (alu_in_counter == k-1 && state == IDX_IN) ? {ipv[0], ipv[1],
 integer l;
 always @(*) begin
   if (alu_in_counter == k-1 && state == IDX_IN) begin
-    for (l = 0; l < k; l=l+1) begin
+    for (l = 0; l < k-1; l=l+1) begin
       alu_mat_in[8*(k-l)-1 -: 8] = val[l];
       alu_vec_in[8*(k-l)-1 -: 8] = vec[col[l]];
     end
+    alu_mat_in[7:0] = val[k-1];
+    alu_vec_in[7:0] = vec[col_idx];
   end
   else begin
     alu_mat_in = {(8*k-1){1'b0}};
