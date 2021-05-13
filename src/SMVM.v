@@ -291,8 +291,8 @@ always @(*) begin
     next_output_buffer[2*k-2] = alu_out[k-1][13:0];
   end
   else begin
-    next_output_buffer[2*k-1] = 0;
-    for (n = 0; n < 2*k-1; n=n+1) begin
+    next_output_buffer[2*k-2] = 0;
+    for (n = 0; n < 2*k-2; n=n+1) begin
       next_output_buffer[n] = output_buffer[n+1];
     end
   end
