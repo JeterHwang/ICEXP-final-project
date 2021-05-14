@@ -4,7 +4,7 @@ module SMVM(
   input         clk,
   input         rst_n,
   input  [7:0]  val_in,
-  input  [2:0]  col_in,
+  // input  [2:0]  col_in,
   input         ipv_in,
   input         in_valid,
   output        out_valid,
@@ -15,18 +15,20 @@ module SMVM(
 /////          parameter              /////
 ///////////////////////////////////////////
 parameter k = 4;
+parameter k_bit = 3;
 parameter alu_stall_cycle = 4;
-parameter max_shape = 4096;
+parameter max_shape = 512;
+parameter max_shape_bit = 9;
 
 
 // state
-parameter IDLE   = 3'b000;    // no op/ input rows
-parameter COL_IN = 3'b001;
-parameter VEC_IN = 3'b010;    // input vector
-parameter VAL_IN = 3'b011;    // input matrix value
-parameter IDX_IN = 3'b100;    // input matrix column index
-parameter CAL    = 3'b101;    // calculate
-parameter OUT    = 3'b110;    // output
+parameter IDLE   = 3'd0;    // no op/ input rows
+parameter COL_IN = 3'd1;
+parameter VEC_IN = 3'd2;    // input vector
+parameter VAL_IN = 3'd3;    // input matrix value
+parameter IDX_IN = 3'd4;    // input matrix column index
+parameter CAL    = 3'd5;    // calculate
+parameter RST    = 3'd6;    // reset for next operation
 
 ///////////////////////////////////////////
 /////          reg & wire             /////
@@ -41,16 +43,19 @@ assign data_out = data_o;
 
 
 // FFs
-reg        [3:0] state, next_state;
-reg        [11:0] counter, next_counter; // counter for vector input / CAL state
-reg        [2:0] alu_in_counter, next_alu_in_counter; // count to k and send to ALU
-reg        [11:0] rows, next_rows;
-reg        [11:0] cols, next_cols;
-reg signed [7:0] vec[0:max_shape-1], next_vec[0:max_shape-1]; // save vector
-reg signed [7:0] mat_val[0:k-1], next_mat_val[0:k-1]; // k * value
-reg        [7:0] col_idx[0:k-1], next_col_idx[0:k-1]; // k * column index
-reg              ipv[0:k-1], next_ipv[0:k-1]; // k * ipv
+reg [3:0] state, next_state;
+reg [8:0] counter, next_counter; // VEC: counter for vector input, count to cols
+                                 // VAL: counter for matrix input, count to k
+                                 // CAL: counter for alu stall
+reg [8:0] rows, next_rows;       // save shape
+reg [8:0] cols, next_cols;       // save shape
+reg [7:0] vec[0:max_shape-1], next_vec[0:max_shape-1]; // save vector
+reg [7:0] mat_val[0:k-1], next_mat_val[0:k-1]; // k * value
+reg [8:0] col_idx[0:k-1], next_col_idx[0:k-1]; // k * column index
+reg       ipv[0:k-1], next_ipv[0:k-1];         // k * ipv
 
+reg [13:0] output_buffer[0:2*k-2], next_output_buffer[0:2*k-2];
+reg [3:0]  output_counter, next_output_counter;
 
 
 // inter connect
@@ -74,22 +79,17 @@ wire [3:0] IPV_l2_out;
 wire [3:0] IPV_l3_out;
   
 // reducer
-reg            reducer_ipv_in;
-reg            reducer_in_valid;
-wire [3:0]     vov;
+reg           reducer_ipv_in;
+reg           reducer_in_valid;
+wire [3:0]    vov;
 
-// output
-// buffer
+// alu l4 output connection
 reg  [27:0]   alu_out[0:k-1];
-reg  [13:0]   output_buffer[0:2*k-2], next_output_buffer[0:2*k-2];
-reg  [3:0]    output_count, next_output_count;
 
 ///////////////////////////////////////////
 /////           submodule             /////
 ///////////////////////////////////////////
-
-
-
+/*
 Map_table_L1 map_l1(
   .clk(clk),
   .rst(rst_n),
@@ -142,10 +142,18 @@ ALU_L4 alu_l4(
   .en(alu_l1_en),
   .out_valid(alu_out_valid)
 );
-  
-  
-  
-// IPV_encoder encoder();
+*/
+ALU_Maple4(
+  .clk(clk),
+  .rst(rst_n),
+  .IPV_l1_in(IPV_l1_in),
+  .alu_mat_in(alu_mat_in),
+  .alu_vec_in(alu_vec_in),
+  .vov(vov),
+  .alu_l4_out(alu_l4_out),
+  .alu_out_valid(alu_out_valid)
+);  
+
 IPV_reducer reducer(
   .clk(clk),
   .rst_n(rst_n),
@@ -159,7 +167,7 @@ IPV_reducer reducer(
 /////          combinational          /////
 ///////////////////////////////////////////
 
-// state logic
+// next state logic
 always @(*) begin
   case(state)
     IDLE   : next_state = in_valid ? COL_IN : IDLE;
@@ -171,23 +179,22 @@ always @(*) begin
     VAL_IN : next_state = in_valid ? IDX_IN : CAL;
     IDX_IN : next_state = VAL_IN;
     CAL    : begin
-      if (counter == alu_stall_cycle) next_state = OUT;
+      if (counter == alu_stall_cycle) next_state = RST;
       else next_state = CAL;
     end
-    OUT    : next_state = IDLE; // FIXME
+    RST    : next_state = IDLE; // FIXME
     default: next_state = IDLE; 
   endcase
 end
 
 
 // input logic
-assign col_idx_concat = { val_in, ipv_in, col_in };
+assign col_idx_concat = { val_in, ipv_in };
 integer j;
 always @(*) begin
   next_rows = rows;
   next_cols = cols;
   next_counter = counter;
-  next_alu_in_counter = alu_in_counter;
   for (j = 0; j < max_shape; j=j+1) begin
     next_vec[j] = vec[j];
   end
@@ -207,66 +214,52 @@ always @(*) begin
       end
       else begin
         next_rows = 0;
-        next_rows = 0;
       end
     end
     COL_IN: begin
       next_cols = col_idx_concat;
     end
     VEC_IN: begin
-      // state
       if (counter == cols-1) next_counter = 0;
       else next_counter = counter + 1;
-
-      // value
       next_vec[counter] = val_in;
     end
     VAL_IN: begin
       if (in_valid) begin
-        next_mat_val[alu_in_counter] = val_in;
-        next_ipv[alu_in_counter] = ipv_in;
+        next_mat_val[counter] = val_in;
+        next_ipv[counter] = ipv_in;
       end
       else begin
-        next_alu_in_counter = 0;
+        counter = 0;
       end
     end
     IDX_IN: begin
-      if (alu_in_counter == k-1) begin
-        next_alu_in_counter = 0;
-      end
-      else begin
-        next_alu_in_counter = alu_in_counter + 1;
-      end
-      next_col_idx[alu_in_counter] = col_idx_concat;
+      if (counter == k-1) next_counter = 0;
+      else next_counter = counter + 1;
+      next_col_idx[counter] = col_idx_concat;
     end
     CAL: begin
-      if (counter == alu_stall_cycle) begin
-        next_counter = 0;
+      if (counter == alu_stall_cycle) next_counter = 0;
+      else next_counter = counter + 1;
+    end
+    RST: begin
+      next_rows = 0;
+      next_cols = 0;
+      next_counter = 0;
+      for (j = 0; j < max_shape; j=j+1) begin
+        next_vec[j] = 0;
       end
-      else begin
-        next_counter = counter + 1;
+      for (j = 0; j < k; j=j+1) begin
+        next_mat_val[j] = 0;
+      end
+      for (j = 0; j < k; j=j+1) begin
+        next_col_idx[j] = 0;
+      end
+      for (j = 0; j < k; j=j+1) begin
+        next_ipv[j] = 0;
       end
     end
-    // CAL, OUT no input
   endcase
-end
-
-// ALU L1 input logic
-assign IPV_l1_in = (alu_in_counter == k-1 && state == IDX_IN) ? {ipv[0], ipv[1], ipv[2], ipv[3]} : {(k){1'b0}};
-integer l;
-always @(*) begin
-  if (alu_in_counter == k-1 && state == IDX_IN) begin
-    for (l = 0; l < k-1; l=l+1) begin
-      alu_mat_in[8*(k-l)-1 -: 8] = mat_val[l];
-      alu_vec_in[8*(k-l)-1 -: 8] = vec[col_idx[l]];
-    end
-    alu_mat_in[7:0] = mat_val[k-1];
-    alu_vec_in[7:0] = vec[col_idx_concat];
-  end
-  else begin
-    alu_mat_in = {(8*k-1){1'b0}};
-    alu_vec_in = {(8*k-1){1'b0}};
-  end
 end
 
 // IPV reducer input logic
@@ -281,7 +274,27 @@ always @(*) begin
   end
 end
 
-// alu output buffer
+// ALU L1 input logic
+assign IPV_l1_in = (counter == k-1 && state == IDX_IN) ? 
+                   { ipv[0], ipv[1], ipv[2], ipv[3] } :
+                   { (k){1'b0} };
+integer l;
+always @(*) begin
+  if (counter == k-1 && state == IDX_IN) begin
+    for (l = 0; l < k-1; l=l+1) begin
+      alu_mat_in[8*(k-l)-1 -: 8] = mat_val[l];
+      alu_vec_in[8*(k-l)-1 -: 8] = vec[col_idx[l]];
+    end
+    alu_mat_in[7:0] = mat_val[k-1];
+    alu_vec_in[7:0] = vec[col_idx_concat];
+  end
+  else begin
+    alu_mat_in = {(8*k-1){1'b0}};
+    alu_vec_in = {(8*k-1){1'b0}};
+  end
+end
+
+// ALU L4 output logic
 integer n;
 always @(*) begin
   for (n = 0; n < k; n=n+1) begin
@@ -302,30 +315,31 @@ always @(*) begin
   end
 end
 
+
 // output logic
 always @(*) begin
-  next_output_count = output_count;
+  next_output_counter = output_counter;
   if (alu_out_valid) begin
     if (vov > 0) begin
-      next_output_count = vov*2-1;
+      next_output_counter = vov*2-1;
       valid_o = 1'b1;
       data_o = alu_out[0][27:14];
     end
     else begin
-      next_output_count = 0;
+      next_output_counter = 0;
       valid_o = 1'b0;
       data_o = 0;
     end
   end
   else begin
-    if (output_count > 0) begin
+    if (output_counter > 0) begin
       valid_o = 1'b1;
-      next_output_count = output_count - 1;
+      next_output_counter = output_counter - 1;
       data_o = output_buffer[0];
     end
     else begin
       valid_o = 1'b0;
-      next_output_count = 0;
+      next_output_counter = 0;
       data_o = 0;
     end
   end
@@ -341,8 +355,7 @@ always@ (posedge clk or negedge rst_n) begin
     rows <= 0;
     cols <= 0;
     counter <= 0;
-    alu_in_counter <= 0;
-    output_count <= 0;
+    output_counter <= 0;
     for (i = 0; i < max_shape; i=i+1) begin
       vec[i] <= 0;
     end
@@ -365,8 +378,7 @@ always@ (posedge clk or negedge rst_n) begin
     rows <= next_rows;
     cols <= next_cols;
     counter <= next_counter;
-    alu_in_counter <= next_alu_in_counter;
-    output_count <= next_output_count;
+    output_counter <= next_output_counter;
     for (i = 0; i < max_shape; i=i+1) begin
       vec[i] <= next_vec[i];
     end
