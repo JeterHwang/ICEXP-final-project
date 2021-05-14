@@ -41,11 +41,11 @@ assign data_out = data_o;
 
 // FFs
 reg        [3:0] state, next_state;
-reg        [7:0] counter, next_counter; // counter for vector input / CAL state
+reg        [11:0] counter, next_counter; // counter for vector input / CAL state
 reg        [2:0] alu_in_counter, next_alu_in_counter; // count to k and send to ALU
-reg        [7:0] rows, next_rows;
-reg        [7:0] cols, next_cols;
-reg signed [7:0] vec[0:127], next_vec[0:127]; // save vector
+reg        [11:0] rows, next_rows;
+reg        [11:0] cols, next_cols;
+reg signed [7:0] vec[0:4095], next_vec[0:4095]; // save vector
 reg signed [7:0] mat_val[0:k-1], next_mat_val[0:k-1]; // k * value
 reg        [7:0] col_idx[0:k-1], next_col_idx[0:k-1]; // k * column index
 reg              ipv[0:k-1], next_ipv[0:k-1]; // k * ipv
