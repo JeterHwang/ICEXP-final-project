@@ -89,7 +89,7 @@ reg  [27:0]   alu_out[0:k-1];
 ///////////////////////////////////////////
 /////           submodule             /////
 ///////////////////////////////////////////
-
+/*
 Map_table_L1 map_l1(
   .clk(clk),
   .rst(rst_n),
@@ -142,6 +142,17 @@ ALU_L4 alu_l4(
   .en(alu_l1_en),
   .out_valid(alu_out_valid)
 );
+*/
+ALU_Maple4(
+  .clk(clk),
+  .rst(rst_n),
+  .IPV_l1_in(IPV_l1_in),
+  .alu_mat_in(alu_mat_in),
+  .alu_vec_in(alu_vec_in),
+  .vov(vov),
+  .alu_l4_out(alu_l4_out),
+  .alu_out_valid(alu_out_valid)
+);  
 
 IPV_reducer reducer(
   .clk(clk),
