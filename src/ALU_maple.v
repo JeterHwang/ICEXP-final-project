@@ -286,7 +286,7 @@ module ALU_L4 #(parameter k = 4)(
     /* ==================== IO ==================== */
     input             clk;
     input             rst;
-    input  [4:0]      ones;
+    input  [3:0]      ones;
     input  [3:0]      IPV_in;
     input  [18*4-1:0] L4_in  ;
     output [28*4-1:0] L4_out ;
@@ -331,8 +331,8 @@ module ALU_L4 #(parameter k = 4)(
     //assign L4_4 = ((counter_r==4'd5)&&(IPV_in[0]==1'b1))?L4_in[18*4-1:18*4-18]:L4_in[18*4-55:0]  ;
     //deco output 
     assign L4_out[28*4-1:28*4-28]   = AAC_L; 
-    assign L4_out[28*4-29:28*4-56]  = (ones==5'd2)?AAC_R:L4_out2_r; 
-    assign L4_out[28*4-57:28*4-84]  = (ones==5'd3)?AAC_R:L4_out3_r; 
+    assign L4_out[28*4-29:28*4-56]  = (ones==4'd2)?AAC_R:L4_out2_r; 
+    assign L4_out[28*4-57:28*4-84]  = (ones==4'd3)?AAC_R:L4_out3_r; 
     assign L4_out[28*4-85:0]        = AAC_R;  
     //delay 
     assign L4_out2_w = {{10{L4_2[17]}},L4_2};
