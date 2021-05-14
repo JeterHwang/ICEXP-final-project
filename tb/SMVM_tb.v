@@ -33,14 +33,13 @@ module SMVM_tb;
 
     reg ipv_in;
     reg [7:0] val_in;
-    reg [2:0] col_in;
     reg in_valid;
 
     wire out_valid;
     wire [13:0] data_out;
 
-    reg [27:0] golden [0:row-1];
-    reg [13:0] H_golden; 
+    reg [25:0] golden [0:row-1];
+    reg [12:0] H_golden; 
 
     integer i;
     integer err_num;
@@ -51,7 +50,6 @@ module SMVM_tb;
         .clk(clk),
         .rst_n(reset_n),
         .val_in(val_in),
-        .col_in(col_in),
         .ipv_in(ipv_in),
         .in_valid(in_valid),
         .out_valid(out_valid),
@@ -68,10 +66,10 @@ module SMVM_tb;
         if(out_valid) begin
             // decide golden
             if(count & 1) begin
-                H_golden = golden[count >> 1][13:0];
+                H_golden = golden[count >> 1][12:0];
             end
             else begin
-                H_golden = golden[count >> 1][27:14];
+                H_golden = golden[count >> 1][25:13];
             end
 
             // answer 
@@ -119,8 +117,8 @@ module SMVM_tb;
         err_num = 0;
         @(negedge clk) begin
             in_valid = 1'b1;
-            val_in = row[11:4];
-            ipv_in = row[3];
+            val_in = row[8:1];
+            ipv_in = row[0];
             col_in = row[2:0];
         end
         @(negedge clk) begin

@@ -45,8 +45,8 @@ def solve(matrix, vector):
             col_tp.append(0)
         for M, R, C in zip(mat_tp, row_tp, col_tp):
             mat.append(np.binary_repr(M, width=8))
-            row.append(np.binary_repr(R, width=12))
-            col.append(np.binary_repr(C, width=12))
+            row.append(np.binary_repr(R, width=9))
+            col.append(np.binary_repr(C, width=9))
     #print(row_tp)
     #print(row)
     for i in range(len(row)):
@@ -57,8 +57,8 @@ def solve(matrix, vector):
     #print(ipv)
     for i in range((4 - len(mat) % 4) % 4): # keep the data size the factor of 4
         mat.append(np.binary_repr(0, width=8))
-        row.append(np.binary_repr(0, width=12))
-        col.append(np.binary_repr(0, width=12))
+        row.append(np.binary_repr(0, width=9))
+        col.append(np.binary_repr(0, width=9))
         ipv.append(np.binary_repr(0, width=1))
     
     for i in range(len(ipv) // 4):
@@ -80,7 +80,7 @@ def solve(matrix, vector):
     
     ans = []
     for ele in output:
-        ans.append(np.binary_repr(ele, width=28))
+        ans.append(np.binary_repr(ele, width=26))
     
     vec = []
     for ele in vector:
