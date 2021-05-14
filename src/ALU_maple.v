@@ -94,7 +94,7 @@ module Map_table_L1 #(parameter k = 4)(
         else    IPV_w = IPV_r ;
     end
     /* ================ Sequencial ================ */
-    always @(posedge clk) begin
+  always @(posedge clk or negedge rst) begin
         if (~rst) begin
             IPV_r   <= 4'b0;
             L2_in_r <= {(32*k){1'b0}};
@@ -183,7 +183,7 @@ module Map_table_L2 #(parameter k = 4)(
                                         (IPV_in[3:1] == 3'd7)                                               ? (L2_out[17*6-69:17*6-85]): (17'b0) ;
     assign L3_in_w[17*6-86:0]         = (IPV_in[3:1] == 3'd7)                                               ? (L2_out[17*6-86:0])      : (17'b0) ; 
     /* ================ Sequencial ================ */
-    always @(posedge clk) begin
+  always @(posedge clk or negedge rst) begin
         if (~rst) begin
             L3_in_r <= {(17*6){1'b0}}; 
         end 
@@ -260,7 +260,7 @@ module Map_table_L3 #(parameter k = 4)(
                                         (IPV_in[3:1] == 3'd4)                                               ? L3_out[18*5-1:18*5-18] : 
                                         (IPV_in[3:1] == 3'd7)                                               ? L3_out[18*5-73:0]      : (18'b0)                 ;  
     /* ================ Sequencial ================ */
-    always @(posedge clk) begin
+  always @(posedge clk or negedge rst) begin
         if (~rst) begin
             L4_in_r <= {(18*4){1'b0}}; 
         end 
@@ -353,7 +353,7 @@ module ALU_L4 #(parameter k = 4)(
 
 
     /* ================ Sequencial ================ */
-    always @(posedge clk) begin
+  always @(posedge clk or negedge rst) begin
         if (~rst) begin
             L4_out2_r <= {28{1'b0}}; 
             L4_out3_r <= {28{1'b0}};

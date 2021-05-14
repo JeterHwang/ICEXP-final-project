@@ -16,6 +16,7 @@ module SMVM(
 ///////////////////////////////////////////
 parameter k = 4;
 parameter alu_stall_cycle = 4;
+parameter max_shape = 4096;
 
 
 // state
@@ -41,11 +42,11 @@ assign data_out = data_o;
 
 // FFs
 reg        [3:0] state, next_state;
-reg        [7:0] counter, next_counter; // counter for vector input / CAL state
+reg        [11:0] counter, next_counter; // counter for vector input / CAL state
 reg        [2:0] alu_in_counter, next_alu_in_counter; // count to k and send to ALU
-reg        [7:0] rows, next_rows;
-reg        [7:0] cols, next_cols;
-reg signed [7:0] vec[0:127], next_vec[0:127]; // save vector
+reg        [11:0] rows, next_rows;
+reg        [11:0] cols, next_cols;
+reg signed [7:0] vec[0:max_shape-1], next_vec[0:max_shape-1]; // save vector
 reg signed [7:0] mat_val[0:k-1], next_mat_val[0:k-1]; // k * value
 reg        [7:0] col_idx[0:k-1], next_col_idx[0:k-1]; // k * column index
 reg              ipv[0:k-1], next_ipv[0:k-1]; // k * ipv
@@ -187,7 +188,7 @@ always @(*) begin
   next_cols = cols;
   next_counter = counter;
   next_alu_in_counter = alu_in_counter;
-  for (j = 0; j < 128; j=j+1) begin
+  for (j = 0; j < max_shape; j=j+1) begin
     next_vec[j] = vec[j];
   end
   for (j = 0; j < k; j=j+1) begin
@@ -342,7 +343,7 @@ always@ (posedge clk or negedge rst_n) begin
     counter <= 0;
     alu_in_counter <= 0;
     output_count <= 0;
-    for (i = 0; i < 128; i=i+1) begin
+    for (i = 0; i < max_shape; i=i+1) begin
       vec[i] <= 0;
     end
     for (i = 0; i < k; i=i+1) begin
@@ -366,7 +367,7 @@ always@ (posedge clk or negedge rst_n) begin
     counter <= next_counter;
     alu_in_counter <= next_alu_in_counter;
     output_count <= next_output_count;
-    for (i = 0; i < 128; i=i+1) begin
+    for (i = 0; i < max_shape; i=i+1) begin
       vec[i] <= next_vec[i];
     end
     for (i = 0; i < k; i=i+1) begin

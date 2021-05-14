@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 `define CYCLE 20
 `define HCYCLE 10
-`define ENDCYCLE 1000000
+`define ENDCYCLE 100000000
 `define dataIn1 "dat/ipv_in.dat"
 `define dataIn2 "dat/matrix_in.dat"
 `define dataIn3 "dat/vector_in.dat"
@@ -20,9 +20,9 @@
 
 module SMVM_tb;
     parameter k = 4;
-    parameter non_zero = 120;
-    parameter row = 12'd16;
-    parameter col = 12'd16;
+    parameter non_zero = 32880;
+    parameter row = 12'd256;
+    parameter col = 12'd256;
 
     reg clk;
     reg reset_n;

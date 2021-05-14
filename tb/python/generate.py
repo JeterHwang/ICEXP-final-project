@@ -14,8 +14,8 @@ probability_matrix = np.array([0.5/255 for i in range(256)])
 probability_matrix[128] = 0.5
 probability_vector = np.array([1.0/256 for i in range(256)])
 
-array_row = 16
-array_col = 16
+array_row = 256
+array_col = 256
 
 def generate_matrix():
     return np.random.choice(data_range, (array_row, array_col), p=probability_matrix)
@@ -29,7 +29,7 @@ def solve(matrix, vector):
     col = []
     ipv = []
     vov = []
-    print(matrix)
+    #print(matrix)
     for i in range(array_row):
         mat_tp = []
         row_tp = []
@@ -47,14 +47,23 @@ def solve(matrix, vector):
             mat.append(np.binary_repr(M, width=8))
             row.append(np.binary_repr(R, width=12))
             col.append(np.binary_repr(C, width=12))
+<<<<<<< HEAD
     # print(row_tp)
     # print(row)
+=======
+    #print(row_tp)
+    #print(row)
+>>>>>>> d914e248ed500ce29ff44b95e9ce043cbdacbfd0
     for i in range(len(row)):
         if i == len(row) - 1 or row[i] != row[i + 1]:
             ipv.append(np.binary_repr(1, width=1))
         else:
             ipv.append(np.binary_repr(0, width=1))
+<<<<<<< HEAD
     # print(ipv)
+=======
+    #print(ipv)
+>>>>>>> d914e248ed500ce29ff44b95e9ce043cbdacbfd0
     for i in range((4 - len(mat) % 4) % 4): # keep the data size the factor of 4
         mat.append(np.binary_repr(0, width=8))
         row.append(np.binary_repr(0, width=12))
