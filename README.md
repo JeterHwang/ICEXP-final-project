@@ -54,3 +54,19 @@ python3 generate.py
 |   |   +-- ipv_in.dat
 |   |   +-- vov_out.dat
 ```
+## 5/14 Notice
+```
+1. bit change
+    ======= input =======
+    ipv : 1 bit
+        +
+    val : 8 bit
+        ||
+    col : 9 bit
+    clk : 1 bit
+    rst : 1 bit
+
+    ====== output =======
+    data_o : 13 bit + 13 bit
+    
+```
