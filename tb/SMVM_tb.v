@@ -1,7 +1,6 @@
 `timescale 1ns/1ps
-`include "../src/SMVM.v"
-`define CYCLE 10
-`define HCYCLE 5
+`define CYCLE 20
+`define HCYCLE 10
 `define ENDCYCLE 1000000
 `define dataIn1 "dat/ipv_in.dat"
 `define dataIn2 "dat/matrix_in.dat"
@@ -9,11 +8,21 @@
 `define dataIn4 "dat/columnIndex_in.dat"
 `define golden  "dat/data_out.dat" 
 
+`ifdef RTL
+    `include "../src/SMVM.v"
+`endif
+`ifdef SYN
+    `include "../syn/SMVM_syn.v"
+    `include "../syn/fsa0m_a_generic_core_21.lib.src"
+	`define SDF
+	`define SDFFILE "../syn/SMVM_syn.sdf"
+`endif
+
 module SMVM_tb;
     parameter k = 4;
-    parameter non_zero = 8240;
-    parameter row = 12'd128;
-    parameter col = 12'd128;
+    parameter non_zero = 120;
+    parameter row = 12'd16;
+    parameter col = 12'd16;
 
     reg clk;
     reg reset_n;
@@ -49,6 +58,10 @@ module SMVM_tb;
         .data_out(data_out)
     );
 
+    `ifdef SDF
+        initial $sdf_annotate(`SDFFILE, Top);
+    `endif
+
     always #(`HCYCLE) clk = ~clk;
     
     always @(negedge clk) begin
@@ -71,12 +84,12 @@ module SMVM_tb;
                 else begin
                     $display("Case %d MSB: got %14b while %14b expected!!\n", (count >> 1), data_out, H_golden);    
                 end
-                err_num <= err_num + 1;
+                err_num = err_num + 1;
             end
-            count <= count + 1;
+            count = count + 1;
         end
         else begin
-            count <= count;
+            count = count;
         end
     end
     
