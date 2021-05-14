@@ -8,7 +8,7 @@ module SMVM(
   input         ipv_in,
   input         in_valid,
   output        out_valid,
-  output [13:0] data_out
+  output [12:0] data_out
 );
 
 ///////////////////////////////////////////
@@ -35,9 +35,9 @@ parameter RST    = 3'd6;    // reset for next operation
 ///////////////////////////////////////////
 
 // inout
-reg  [13:0] data_o;
+reg  [12:0] data_o;
 reg         valid_o;
-wire [11:0] col_idx_concat;
+wire [8:0] col_idx_concat;
 assign out_valid = valid_o;
 assign data_out = data_o;
 
@@ -54,7 +54,7 @@ reg [7:0] mat_val[0:k-1], next_mat_val[0:k-1]; // k * value
 reg [8:0] col_idx[0:k-1], next_col_idx[0:k-1]; // k * column index
 reg       ipv[0:k-1], next_ipv[0:k-1];         // k * ipv
 
-reg [13:0] output_buffer[0:2*k-2], next_output_buffer[0:2*k-2];
+reg [12:0] output_buffer[0:2*k-2], next_output_buffer[0:2*k-2];
 reg [3:0]  output_counter, next_output_counter;
 
 
@@ -69,7 +69,7 @@ wire [17*6-1:0] alu_l2_out;
 wire [17*6-1:0] alu_l3_in ;
 wire [18*5-1:0] alu_l3_out;
 wire [18*4-1:0] alu_l4_in ;
-wire [28*4-1:0] alu_l4_out;
+wire [26*4-1:0] alu_l4_out;
 wire            alu_out_valid;
 
 // Map_table
@@ -84,7 +84,7 @@ reg           reducer_in_valid;
 wire [3:0]    vov;
 
 // alu l4 output connection
-reg  [27:0]   alu_out[0:k-1];
+reg  [25:0]   alu_out[0:k-1];
 
 ///////////////////////////////////////////
 /////           submodule             /////
@@ -298,7 +298,7 @@ end
 integer n;
 always @(*) begin
   for (n = 0; n < k; n=n+1) begin
-    alu_out[n] = alu_l4_out[28*(4-n)-1 -: 28];
+    alu_out[n] = alu_l4_out[26*(4-n)-1 -: 26];
   end
   if (alu_out_valid) begin
     for (n = 0; n < k-1; n=n+1) begin
@@ -323,7 +323,7 @@ always @(*) begin
     if (vov > 0) begin
       next_output_counter = vov*2-1;
       valid_o = 1'b1;
-      data_o = alu_out[0][27:14];
+      data_o = alu_out[0][26:13];
     end
     else begin
       next_output_counter = 0;

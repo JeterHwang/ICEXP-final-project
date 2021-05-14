@@ -29,14 +29,14 @@ module SMVM_tb;
     
     reg ipv_val;
     reg [7:0] matrix_val;
-    reg [11:0] column_index;
+    reg [8:0] column_index;
 
     reg ipv_in;
     reg [7:0] val_in;
     reg in_valid;
 
     wire out_valid;
-    wire [13:0] data_out;
+    wire [12:0] data_out;
 
     reg [25:0] golden [0:row-1];
     reg [12:0] H_golden; 
@@ -77,10 +77,10 @@ module SMVM_tb;
                 if(err_num === 0)
                     $display("Error!!\n");
                 if(count & 1) begin
-                    $display("Case %d LSB: got %14b while %14b expected!!\n", (count >> 1), data_out, H_golden);    
+                    $display("Case %d LSB: got %13b while %13b expected!!\n", (count >> 1), data_out, H_golden);    
                 end
                 else begin
-                    $display("Case %d MSB: got %14b while %14b expected!!\n", (count >> 1), data_out, H_golden);    
+                    $display("Case %d MSB: got %13b while %13b expected!!\n", (count >> 1), data_out, H_golden);    
                 end
                 err_num = err_num + 1;
             end
@@ -119,12 +119,10 @@ module SMVM_tb;
             in_valid = 1'b1;
             val_in = row[8:1];
             ipv_in = row[0];
-            col_in = row[2:0];
         end
         @(negedge clk) begin
-            val_in = col[11:4];
-            ipv_in = col[3];
-            col_in = col[2:0];
+            val_in = col[8:1];
+            ipv_in = col[0];
         end
         for(i = 0 ; i < col; i = i + 1) begin
             @(negedge clk) begin
@@ -138,21 +136,19 @@ module SMVM_tb;
                 $fscanf(columnIndex, "%b\n", column_index);
                 $fscanf(ipv, "%b\n", ipv_val);
                 ipv_in = ipv_val;
-                val_in = matrix_val[7:0];
+                val_in = matrix_val;
             end 
             if(i == non_zero - 1) begin // columnIndex input 
                 @(negedge clk) begin  // last input
-                    val_in = column_index[11:4];
-                    ipv_in = column_index[3];
-                    col_in = column_index[2:0];
+                    val_in = column_index[8:1];
+                    ipv_in = column_index[0];
                     in_valid = 1'b0;  
                 end    
             end
             else begin
                 @(negedge clk) begin 
-                    val_in = column_index[11:4];
-                    ipv_in = column_index[3];
-                    col_in = column_index[2:0];
+                    val_in = column_index[8:1];
+                    ipv_in = column_index[0];
                 end    
             end 
         end  
