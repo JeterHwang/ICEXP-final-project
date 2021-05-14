@@ -62,8 +62,8 @@ python3 generate.py
         +
     val : 8 bit
         ||
-    col : 9 bit
-    
+    col : 9 bit (no need to have this port !!)
+
     clk : 1 bit
     rst : 1 bit
 
