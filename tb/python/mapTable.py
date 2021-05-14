@@ -66,8 +66,9 @@ def make_table(k, N):
     return T
 
 if __name__ == '__main__':
-    k = 8
+    k = 5
     N = generate_N(k)
     table = make_table(k, N)
-    np.savetxt('../csv/maptable.csv', table, delimiter=',')
+    print(table)
+    np.savetxt('../csv/maptable.csv', table, delimiter=',', fmt='%d')
     print(table)
