@@ -143,7 +143,7 @@ ALU_L4 alu_l4(
   .out_valid(alu_out_valid)
 );
 */
-ALU_Maple4(
+ALU_Maple4 alu(
   .clk(clk),
   .rst(rst_n),
   .IPV_l1_in(IPV_l1_in),
@@ -302,10 +302,10 @@ always @(*) begin
   end
   if (alu_out_valid) begin
     for (n = 0; n < k-1; n=n+1) begin
-      next_output_buffer[2*n]   = alu_out[n][13: 0];
-      next_output_buffer[2*n+1] = alu_out[n+1][27:14];
+      next_output_buffer[2*n]   = alu_out[n][12: 0];
+      next_output_buffer[2*n+1] = alu_out[n+1][25:13];
     end
-    next_output_buffer[2*k-2] = alu_out[k-1][13:0];
+    next_output_buffer[2*k-2] = alu_out[k-1][12:0];
   end
   else begin
     next_output_buffer[2*k-2] = 0;
@@ -323,7 +323,7 @@ always @(*) begin
     if (vov > 0) begin
       next_output_counter = vov*2-1;
       valid_o = 1'b1;
-      data_o = alu_out[0][26:13];
+      data_o = alu_out[0][25:13];
     end
     else begin
       next_output_counter = 0;
