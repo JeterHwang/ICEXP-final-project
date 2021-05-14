@@ -73,7 +73,7 @@ wire [3:0] IPV_l2_out;
 wire [3:0] IPV_l3_out;
   
 // reducer
-reg  [k-1:0]   reducer_ipv_in;
+reg            reducer_ipv_in;
 reg            reducer_in_valid;
 wire [3:0]     vov;
 
