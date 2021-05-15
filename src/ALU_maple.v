@@ -196,7 +196,8 @@ module ALU_L1 #(parameter k = 4)(
     assign L1_out_4 = mat_4 * vec_4;
 
     //signal of ready to process the new 4 bits
-    assign en = ((matrix_in[8*k-1:8*k-8] == 8'b0)&&(IPV == {k{1'b0}}))? 1'b0 : 1'b1 ;
+    //assign en = ((matrix_in[8*k-1:8*k-8] == 8'b0)&&(IPV == {k{1'b0}}))? 1'b0 : 1'b1 ;
+  assign en = ((~|matrix_in[8*k-1:8*k-8])&&(IPV == {k{1'b0}}))? 1'b0 : 1'b1 ;
 
 endmodule
 
@@ -257,10 +258,13 @@ module Map_table_L1 #(parameter k = 4)(
     assign L2_in_8   = L2_in_r[32*k-113:0]      ;
 
     //Match in/out
-    assign L2_in_w[32*k-1:32*k-16]    = ((IPV_in[3:1] == 3'd0)||(IPV_in[3:1] == 3'd1)||(IPV_in[3:1] == 3'd2)||(IPV_in[3:1] == 3'd3))? (L1_out_1): 
+    //assign L2_in_w[32*k-1:32*k-16]    = ((IPV_in[3:1] == 3'd0)||(IPV_in[3:1] == 3'd1)||(IPV_in[3:1] == 3'd2)||(IPV_in[3:1] == 3'd3))? (L1_out_1): 
+    //                                    ((IPV_in[3:1] == 3'd4)||(IPV_in[3:1] == 3'd5))                                              ? (L1_out_2):
+    //                                    (IPV_in[3:1] == 3'd6)                                                                       ? (L1_out_3): (16'b0) ; 
+    assign L2_in_w[32*k-1:32*k-16]    = ((IPV_in[3:1] <= 3'd3))                                                                     ? (L1_out_1): 
                                         ((IPV_in[3:1] == 3'd4)||(IPV_in[3:1] == 3'd5))                                              ? (L1_out_2):
                                         (IPV_in[3:1] == 3'd6)                                                                       ? (L1_out_3): (16'b0) ; 
-    assign L2_in_w[32*k-17:32*k-32]   = ((IPV_in[3:1] == 3'd0)||(IPV_in[3:1] == 3'd1)||(IPV_in[3:1] == 3'd2)||(IPV_in[3:1] == 3'd3))? (L1_out_2): 
+    assign L2_in_w[32*k-17:32*k-32]   = ((IPV_in[3:1] <= 3'd3))                                                                     ? (L1_out_2): 
                                         ((IPV_in[3:1] == 3'd4)||(IPV_in[3:1] == 3'd5))                                              ? (L1_out_3):
                                         (IPV_in[3:1] == 3'd6)                                                                       ? (L1_out_4): (16'b0) ;  
     assign L2_in_w[32*k-33:32*k-48]   = ((IPV_in[3:1] == 3'd0)||(IPV_in[3:1] == 3'd2))                                              ? (L1_out_3): (16'b0) ; 
@@ -560,7 +564,7 @@ module ALU_L4 #(parameter k = 4)(
     
     reg  [25:0] L4_out2_r,L4_out3_r;
     wire [25:0] L4_out2_w,L4_out3_w;
-    reg  [3:0] counter_r,counter_w;
+    reg  [2:0] counter_r,counter_w;
     
     /* ================= Submodules =============== */
     AAC aac_l(
@@ -579,14 +583,17 @@ module ALU_L4 #(parameter k = 4)(
     );
 
     /* ================== Conti =================== */
-    assign aac_valid_l = (counter_r == 4'd4 && IPV_in != 4'b0000) ? 1'b0 : 1'b1;
+    //assign aac_valid_l = (counter_r == 3'd4 && IPV_in != 4'b0000) ? 1'b0 : 1'b1;
+    assign aac_valid_l = (counter_r[2] && (|IPV_in)) ? 1'b0 : 1'b1;
     assign aac_valid_r = 1'b0;
     //deco L4_in
-    assign L4_1 = ((counter_r==4'd4) && (IPV_in[0]==1'b0)) ? AAC_R : 
-                  (counter_r == 4'd3) ? {{8{L4_in_1[17]}}, L4_in_1} : 26'd0;
+    //assign L4_1 = ((counter_r==3'd4) && (IPV_in[0]==1'b0)) ? AAC_R : 
+    //              (counter_r == 3'd3) ? {{8{L4_in_1[17]}}, L4_in_1} : 26'd0;
+    assign L4_1 = (counter_r[2] && ~IPV_in[0]) ? AAC_R : 
+                  (counter_r == 3'd3) ? {{8{L4_in_1[17]}}, L4_in_1} : 26'd0;
     assign L4_2 = {{8{L4_in_2[17]}}, L4_in_2} ;
     assign L4_3 = {{8{L4_in_3[17]}}, L4_in_3} ;
-    assign L4_4 = (counter_r == 4'd3) ? {{8{L4_in_4[17]}}, L4_in_4} : 26'd0;
+    assign L4_4 = (counter_r == 3'd3) ? {{8{L4_in_4[17]}}, L4_in_4} : 26'd0;
     //deco output 
     assign L4_out[26*4-1:26*4-26]   = AAC_L; 
     assign L4_out[26*4-27:26*4-52]  = (ones==4'd2)?AAC_R:L4_out2_r; 
@@ -597,14 +604,17 @@ module ALU_L4 #(parameter k = 4)(
     assign L4_out3_w = L4_3; 
 
     //output is ready
-    assign out_valid = (counter_r==4'd4)?1'b1:1'b0;
+    //assign out_valid = (counter_r==3'd4)?1'b1:1'b0;
+    assign out_valid = counter_r[2];
 
     /* ================ Combination =============== */
     always @(*) begin
         counter_w = counter_r;
-        if (en && (counter_r==4'b0)) counter_w = 4'b1;
-        else if ((counter_r>=4'b1)&&(counter_r<4'd4)) counter_w = counter_r + 4'b1;
-        else if (counter_r==4'd4)    counter_w = 4'b0;
+        //if (en && (counter_r==3'b0)) counter_w = 3'b1;
+        if (en && (~|counter_r)) counter_w = 3'd1;
+        else if ((counter_r>=3'd1)&&(counter_r<3'd4)) counter_w = counter_r + 3'd1;
+        else if (counter_r[2]==1'b1)    counter_w = 3'd0;
+        //else if (counter_r==3'd4)    counter_w = 3'd0;
     end
     
     /* ================ Sequencial ================ */
@@ -612,7 +622,7 @@ module ALU_L4 #(parameter k = 4)(
         if (~rst) begin
             L4_out2_r <= {26{1'b0}}; 
             L4_out3_r <= {26{1'b0}};
-            counter_r <= 4'b0;
+            counter_r <= 3'b0;
         end 
         else begin
             L4_out2_r <= L4_out2_w; 
