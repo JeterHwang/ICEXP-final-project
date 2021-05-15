@@ -63,20 +63,20 @@ reg [3:0]  output_counter, next_output_counter;
 wire            alu_l1_en ;
 reg  [8*k-1:0]  alu_mat_in;
 reg  [8*k-1:0]  alu_vec_in;
-wire [16*k-1:0] alu_l1_out;
-wire [32*k-1:0] alu_l2_in ;
-wire [17*6-1:0] alu_l2_out;
-wire [17*6-1:0] alu_l3_in ;
-wire [18*5-1:0] alu_l3_out;
-wire [18*4-1:0] alu_l4_in ;
+//wire [16*k-1:0] alu_l1_out;
+//wire [32*k-1:0] alu_l2_in ;
+//wire [17*6-1:0] alu_l2_out;
+//wire [17*6-1:0] alu_l3_in ;
+//wire [18*5-1:0] alu_l3_out;
+//wire [18*4-1:0] alu_l4_in ;
 wire [26*4-1:0] alu_l4_out;
 wire            alu_out_valid;
 
 // Map_table
 wire [3:0] IPV_l1_in ;
-wire [3:0] IPV_l1_out;
-wire [3:0] IPV_l2_out;
-wire [3:0] IPV_l3_out;
+//wire [3:0] IPV_l1_out;
+//wire [3:0] IPV_l2_out;
+//wire [3:0] IPV_l3_out;
   
 // reducer
 reg           reducer_ipv_in;
