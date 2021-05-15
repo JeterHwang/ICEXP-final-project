@@ -230,7 +230,7 @@ always @(*) begin
         next_ipv[counter] = ipv_in;
       end
       else begin
-        counter = 0;
+        next_counter = 0;
       end
     end
     IDX_IN: begin

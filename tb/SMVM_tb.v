@@ -1,6 +1,6 @@
-`timescale 1ns/1ps
-`define CYCLE 20
-`define HCYCLE 10
+`timescale 1ns/10ps
+`define CYCLE 10
+`define HCYCLE 5
 `define ENDCYCLE 100000000
 `define dataIn1 "dat/ipv_in.dat"
 `define dataIn2 "dat/matrix_in.dat"
@@ -14,8 +14,8 @@
 `ifdef SYN
     `include "../syn/SMVM_syn.v"
     `include "../syn/fsa0m_a_generic_core_21.lib.src"
-	`define SDF
-	`define SDFFILE "../syn/SMVM_syn.sdf"
+	//`define SDF
+	//`define SDFFILE "../syn/SMVM_syn.sdf"
 `endif
 
 module SMVM_tb;
@@ -59,37 +59,6 @@ module SMVM_tb;
     `ifdef SDF
         initial $sdf_annotate(`SDFFILE, Top);
     `endif
-
-    always #(`HCYCLE) clk = ~clk;
-    
-    always @(negedge clk) begin
-        if(out_valid) begin
-            // decide golden
-            if(count & 1) begin
-                H_golden = golden[count >> 1][12:0];
-            end
-            else begin
-                H_golden = golden[count >> 1][25:13];
-            end
-
-            // answer 
-            if(H_golden !== data_out) begin
-                if(err_num === 0)
-                    $display("Error!!\n");
-                if(count & 1) begin
-                    $display("Case %d LSB: got %13b while %13b expected!!\n", (count >> 1), data_out, H_golden);    
-                end
-                else begin
-                    $display("Case %d MSB: got %13b while %13b expected!!\n", (count >> 1), data_out, H_golden);    
-                end
-                err_num = err_num + 1;
-            end
-            count = count + 1;
-        end
-        else begin
-            count = count;
-        end
-    end
     
     initial begin
         $fsdbDumpfile("top.fsdb");            
@@ -105,6 +74,10 @@ module SMVM_tb;
             $display("Cannot read input file !!");
             $finish;
         end
+
+        $display("------------------------------------------------------------\n");
+        $display("START!!! Simulation Start .....\n");
+        $display("------------------------------------------------------------\n");
 
         clk = 0;
         count = 0;
@@ -154,13 +127,33 @@ module SMVM_tb;
         end  
     end
 
-    initial begin
-        #(`CYCLE * `ENDCYCLE)
-        $display("============================================================\n");
-        $display("Simulation time is longer than expected.");
-        $display("The test result is .....FAIL :(\n");
-        $display("============================================================\n");
-        $finish;
+    always @(negedge clk) begin
+        if(out_valid) begin
+            // decide golden
+            if(count & 1) begin
+                H_golden = golden[count >> 1][12:0];
+            end
+            else begin
+                H_golden = golden[count >> 1][25:13];
+            end
+
+            // answer 
+            if(H_golden !== data_out) begin
+                if(err_num === 0)
+                    $display("Error!!\n");
+                if(count & 1) begin
+                    $display("Case %d LSB: got %13b while %13b expected!!\n", (count >> 1), data_out, H_golden);    
+                end
+                else begin
+                    $display("Case %d MSB: got %13b while %13b expected!!\n", (count >> 1), data_out, H_golden);    
+                end
+                err_num = err_num + 1;
+            end
+            count = count + 1;
+        end
+        else begin
+            count = count;
+        end
     end
 
     always @(count) begin
@@ -235,4 +228,16 @@ module SMVM_tb;
             $finish;
         end
     end
+
+    initial begin
+        #(`CYCLE * `ENDCYCLE)
+        $display("============================================================\n");
+        $display("Simulation time is longer than expected.");
+        $display("The test result is .....FAIL :(\n");
+        $display("============================================================\n");
+        $finish;
+    end
+
+    always #(`HCYCLE) clk = ~clk;
+
 endmodule
