@@ -13,7 +13,7 @@
 `endif
 `ifdef SYN
     `include "../syn/SMVM_syn.v"
-    `include "../syn/fsa0m_a_generic_core_21.lib.src"
+    //`include "../syn/fsa0m_a_generic_core_21.lib.src"
 	//`define SDF
 	//`define SDFFILE "../syn/SMVM_syn.sdf"
 `endif

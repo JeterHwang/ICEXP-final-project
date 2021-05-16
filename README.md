@@ -14,6 +14,14 @@ git clone https://github.com/JeterHwang/ICEXP-final-project.git
 >	source /usr/cad/synopsys/CIC/synthesis.cshrc
 ```
 
+## test Command
+```
+cd tb
+
+RTL : ncverilog SMVM_tb.v +define+RTL +access+r
+SYN : ncverilog SMVM_tb.v -v fsa0m_a_generic_core_21.lib.src +define+SYN +access+r
+```
+
 ## Pattern Generating
 1. generate data
 ```
