@@ -9,9 +9,11 @@ git clone https://github.com/JeterHwang/ICEXP-final-project.git
 
 ## Source Command
 ```
->	source /usr/cad/cadence/cshrc
->	source /usr/cad/synopsys/CIC/verdi.cshrc
->	source /usr/cad/synopsys/CIC/synthesis.cshrc
+source /usr/cad/cadence/cshrc
+source /usr/cad/synopsys/CIC/verdi.cshrc
+source /usr/cad/synopsys/CIC/synthesis.cshrc
+source /usr/cad/cadence/CIC/license.cshrc
+source /usr/cad/cadence/CIC/innovus.cshrc
 ```
 
 ## test Command
