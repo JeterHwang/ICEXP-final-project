@@ -558,18 +558,18 @@ module ALU_L4 #(parameter k = 4)(
     input signed  [17:0]     L4_in_2 ;
     input signed  [17:0]     L4_in_3 ;
     input signed  [17:0]     L4_in_4 ;
-    output        [26*4-1:0] L4_out ;
+    output        [24*4-1:0] L4_out ;
     input                    en;
     output                   out_valid;
 
     /* ================= WIRE/REG ================= */
-    wire signed [25:0] L4_1,L4_2,L4_3,L4_4;
+    wire signed [23:0] L4_1,L4_2,L4_3,L4_4;
     
-    wire signed [25:0] AAC_L;
+    wire signed [23:0] AAC_L;
     wire aac_valid_l;
     
-    reg  [25:0] L4_out2_r,L4_out3_r,L4_out4_r;
-    wire [25:0] L4_out2_w,L4_out3_w,L4_out4_w;
+    reg  [23:0] L4_out2_r,L4_out3_r,L4_out4_r;
+    wire [23:0] L4_out2_w,L4_out3_w,L4_out4_w;
     reg  [2:0] counter_r,counter_w;
     
     /* ================= Submodules =============== */
@@ -584,15 +584,15 @@ module ALU_L4 #(parameter k = 4)(
     assign aac_valid_l = (counter_r[2] && (|IPV_in)) ? 1'b0 : 1'b1;
     //deco L4_in
     assign L4_1 = (counter_r[2] && ~IPV_in[0]) ? L4_out4_r : 
-                  (counter_r == 3'd3) ? {{8{L4_in_1[17]}}, L4_in_1} : 26'd0;
-    assign L4_2 = {{8{L4_in_2[17]}}, L4_in_2} ;
-    assign L4_3 = {{8{L4_in_3[17]}}, L4_in_3} ;
-    assign L4_4 = {{8{L4_in_4[17]}}, L4_in_4} ;
+                  (counter_r == 3'd3) ? {{6{L4_in_1[17]}}, L4_in_1} : 26'd0;
+    assign L4_2 = {{6{L4_in_2[17]}}, L4_in_2} ;
+    assign L4_3 = {{6{L4_in_3[17]}}, L4_in_3} ;
+    assign L4_4 = {{6{L4_in_4[17]}}, L4_in_4} ;
     //deco output 
-    assign L4_out[26*4-1:26*4-26]   = AAC_L; 
-    assign L4_out[26*4-27:26*4-52]  = (ones==4'd2)?L4_out4_r:L4_out2_r; 
-    assign L4_out[26*4-53:26*4-78]  = (ones==4'd3)?L4_out4_r:L4_out3_r; 
-    assign L4_out[26*4-79:0]        = L4_out4_r;
+    assign L4_out[24*4-1:24*4-24]   = AAC_L; 
+    assign L4_out[24*4-25:24*4-48]  = (ones==4'd2)?L4_out4_r:L4_out2_r; 
+    assign L4_out[24*4-49:24*4-72]  = (ones==4'd3)?L4_out4_r:L4_out3_r; 
+    assign L4_out[24*4-73:0]        = L4_out4_r;
     //delay 
     assign L4_out2_w = L4_2;
     assign L4_out3_w = L4_3;
@@ -613,9 +613,9 @@ module ALU_L4 #(parameter k = 4)(
     /* ================ Sequencial ================ */
   always @(posedge clk or negedge rst) begin
         if (~rst) begin
-            L4_out2_r <= {26{1'b0}}; 
-            L4_out3_r <= {26{1'b0}};
-            L4_out4_r <= {26{1'b0}};
+            L4_out2_r <= {24{1'b0}}; 
+            L4_out3_r <= {24{1'b0}};
+            L4_out4_r <= {24{1'b0}};
             counter_r <= 3'b0;
         end 
         else begin
