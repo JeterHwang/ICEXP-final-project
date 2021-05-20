@@ -17,7 +17,11 @@ module ALU_Maple4 #(parameter k = 4) (
     input         [8*k-1:0]  alu_mat_in    ; 
     input         [8*k-1:0]  alu_vec_in    ; 
     input         [3:0]      vov           ;
+<<<<<<< HEAD
     output        [24*4-1:0] alu_l4_out    ;
+=======
+  output        [24*4-1:0] alu_l4_out    ;
+>>>>>>> 448aae13c43681ac4988777ed649c57906d6942a
     output                   alu_out_valid ; 
     /* ================= WIRE/REG ================= */
     // alu
