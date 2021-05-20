@@ -68,7 +68,7 @@ reg  [8*k-1:0]  alu_vec_in;
 //wire [17*6-1:0] alu_l3_in ;
 //wire [18*5-1:0] alu_l3_out;
 //wire [18*4-1:0] alu_l4_in ;
-wire [26*4-1:0] alu_l4_out;
+wire [24*4-1:0] alu_l4_out;
 wire            alu_out_valid;
 
 // Map_table
@@ -83,7 +83,7 @@ reg           reducer_in_valid;
 wire [3:0]    vov;
 
 // alu l4 output connection
-reg  [25:0]   alu_out[0:k-1];
+reg  [23:0]   alu_out[0:k-1];
 
 ///////////////////////////////////////////
 /////           submodule             /////
@@ -296,14 +296,14 @@ end
 integer n;
 always @(*) begin
   for (n = 0; n < k; n=n+1) begin
-    alu_out[n] = alu_l4_out[26*(4-n)-1 -: 26];
+    alu_out[n] = alu_l4_out[24*(4-n)-1 -: 24];
   end
   if (alu_out_valid) begin
     for (n = 0; n < k-1; n=n+1) begin
-      next_output_buffer[2*n]   = alu_out[n][12: 0];
-      next_output_buffer[2*n+1] = alu_out[n+1][25:13];
+      next_output_buffer[2*n]   = alu_out[n][11: 0];
+      next_output_buffer[2*n+1] = alu_out[n+1][23:12];
     end
-    next_output_buffer[2*k-2] = alu_out[k-1][12:0];
+    next_output_buffer[2*k-2] = alu_out[k-1][11:0];
   end
   else begin
     next_output_buffer[2*k-2] = 0;
@@ -321,7 +321,7 @@ always @(*) begin
     if (vov > 0) begin
       next_output_counter = vov*2-1;
       valid_o = 1'b1;
-      data_o = alu_out[0][25:13];
+      data_o = alu_out[0][23:12];
     end
     else begin
       next_output_counter = 0;
