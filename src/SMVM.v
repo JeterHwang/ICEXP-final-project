@@ -18,7 +18,6 @@ parameter k = 4;
 parameter k_bit = 3;
 parameter alu_stall_cycle = 4;
 parameter max_shape = 256;
-parameter max_shape_bit = 8;
 
 
 // state
@@ -35,8 +34,9 @@ parameter RST    = 3'd6;    // reset for next operation
 ///////////////////////////////////////////
 
 // inout
-reg  [12:0] data_o;
+reg  [11:0] data_o;
 reg         valid_o;
+wire [8:0]  col_idx_concat
 assign out_valid = valid_o;
 assign data_out = data_o;
 
@@ -46,16 +46,15 @@ reg [3:0] state, next_state;
 reg [7:0] counter, next_counter; // VEC: counter for vector input, count to cols
                                  // VAL: counter for matrix input, count to k
                                  // CAL: counter for alu stall
-reg [7:0] rows, next_rows;       // save shape
-reg [7:0] cols, next_cols;       // save shape
+reg [8:0] rows, next_rows;       // save shape
+reg [8:0] cols, next_cols;       // save shape
 reg [7:0] vec[0:max_shape-1], next_vec[0:max_shape-1]; // save vector
 reg [7:0] mat_val[0:k-1], next_mat_val[0:k-1]; // k * value
-reg [7:0] col_idx[0:k-1], next_col_idx[0:k-1]; // k * column index
+reg [8:0] col_idx[0:k-1], next_col_idx[0:k-1]; // k * column index
 reg       ipv[0:k-1], next_ipv[0:k-1];         // k * ipv
 
 reg [11:0] output_buffer[0:2*k-2], next_output_buffer[0:2*k-2];
 reg [3:0]  output_counter, next_output_counter;
-
 
 // inter connect
 // alu
@@ -189,6 +188,7 @@ end
 
 // input logic
 integer j;
+assign col_idx_concat = { val_in, ipv }
 always @(*) begin
   next_rows = rows;
   next_cols = cols;
@@ -208,14 +208,14 @@ always @(*) begin
   case(state)
     IDLE: begin
       if (in_valid) begin
-        next_rows = val_in;
+        next_rows = col_idx_concat;
       end
       else begin
         next_rows = 0;
       end
     end
     COL_IN: begin
-      next_cols = val_in;
+      next_cols = col_idx_concat;
     end
     VEC_IN: begin
       if (counter == cols-1) next_counter = 0;
@@ -234,7 +234,7 @@ always @(*) begin
     IDX_IN: begin
       if (counter == k-1) next_counter = 0;
       else next_counter = counter + 1;
-      next_col_idx[counter] = val_in;
+      next_col_idx[counter] = col_idx_concat;
     end
     CAL: begin
       if (counter == alu_stall_cycle) next_counter = 0;
