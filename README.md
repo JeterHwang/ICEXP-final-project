@@ -71,13 +71,13 @@ python3 generate.py
     ipv : 1 bit
         +
     val : 8 bit
-        ||
-    col : 9 bit (no need to have this port !!)
+        
+    col : 8 bit (no need to have this port !!)
 
     clk : 1 bit
     rst : 1 bit
 
     ====== output =======
-    data_o : 13 bit + 13 bit
+    data_o : 12 bit + 12 bit
     
 ```
