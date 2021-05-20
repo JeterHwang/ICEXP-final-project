@@ -1,21 +1,36 @@
 `timescale 1ns/10ps
-`define CYCLE 10
-`define HCYCLE 5
-`define ENDCYCLE 100000000
-`define dataIn1 "dat/ipv_in.dat"
-`define dataIn2 "dat/matrix_in.dat"
-`define dataIn3 "dat/vector_in.dat"
-`define dataIn4 "dat/columnIndex_in.dat"
-`define golden  "dat/data_out.dat" 
+`define CYCLE 20
+`define HCYCLE 10
+`define ENDCYCLE 100000
 
 `ifdef RTL
     `include "../src/SMVM.v"
+    `define dataIn1 "dat/ipv_in.dat"
+    `define dataIn2 "dat/matrix_in.dat"
+    `define dataIn3 "dat/vector_in.dat"
+    `define dataIn4 "dat/columnIndex_in.dat"
+    `define golden  "dat/data_out.dat" 
 `endif
 `ifdef SYN
     `include "../syn/SMVM_syn.v"
+    `define dataIn1 "dat/ipv_in.dat"
+    `define dataIn2 "dat/matrix_in.dat"
+    `define dataIn3 "dat/vector_in.dat"
+    `define dataIn4 "dat/columnIndex_in.dat"
+    `define golden  "dat/data_out.dat" 
     //`include "../syn/fsa0m_a_generic_core_21.lib.src"
-	//`define SDF
-	//`define SDFFILE "../syn/SMVM_syn.sdf"
+	`define SDF
+	`define SDFFILE "../syn/SMVM_syn.sdf"
+`endif
+`ifdef APR
+    `include "../Verilog/SMVM_apr.v"
+    `define dataIn1 "../../tb/dat/ipv_in.dat"
+    `define dataIn2 "../../tb/dat/matrix_in.dat"
+    `define dataIn3 "../../tb/dat/vector_in.dat"
+    `define dataIn4 "../../tb/dat/columnIndex_in.dat"
+    `define golden  "../../tb/dat/data_out.dat" 
+    `define SDF
+    `define SDFFILE "../Verilog/SMVM_apr.sdf"
 `endif
 
 module SMVM_tb;
