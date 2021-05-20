@@ -494,7 +494,7 @@ module CHIP ( clk_p_i, reset_n_i, data_a_i, data_b_i, inst_i, data_o );
   wire [7:0] i_val_in;
   wire       i_ipv_in;
   wire       i_in_valid;
-  wire [12:0] i_data_o;
+  wire [12:0] i_data_out;
   wire       i_out_valid;
 
   wire [2:0] i_inst_i;

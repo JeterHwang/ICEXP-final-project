@@ -12,8 +12,8 @@ git clone https://github.com/JeterHwang/ICEXP-final-project.git
 source /usr/cad/cadence/cshrc
 source /usr/cad/synopsys/CIC/verdi.cshrc
 source /usr/cad/synopsys/CIC/synthesis.cshrc
-source /usr/cad/cadence/CIC/license.cshrc
-source /usr/cad/cadence/CIC/innovus.cshrc
+source /usr/cad/innovus/CIC/license.cshrc
+source /usr/cad/innovus/CIC/innovus.cshrc
 ```
 
 ## test Command
