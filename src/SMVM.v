@@ -36,7 +36,7 @@ parameter RST    = 3'd6;    // reset for next operation
 // inout
 reg  [11:0] data_o;
 reg         valid_o;
-wire [8:0]  col_idx_concat
+wire [8:0]  col_idx_concat;
 assign out_valid = valid_o;
 assign data_out = data_o;
 
@@ -188,7 +188,7 @@ end
 
 // input logic
 integer j;
-assign col_idx_concat = { val_in, ipv }
+assign col_idx_concat = { val_in, ipv_in };
 always @(*) begin
   next_rows = rows;
   next_cols = cols;

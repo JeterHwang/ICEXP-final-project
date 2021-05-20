@@ -17,7 +17,7 @@ module ALU_Maple4 #(parameter k = 4) (
     input         [8*k-1:0]  alu_mat_in    ; 
     input         [8*k-1:0]  alu_vec_in    ; 
     input         [3:0]      vov           ;
-    output        [26*4-1:0] alu_l4_out    ;
+    output        [24*4-1:0] alu_l4_out    ;
     output                   alu_out_valid ; 
     /* ================= WIRE/REG ================= */
     // alu
@@ -584,7 +584,7 @@ module ALU_L4 #(parameter k = 4)(
     assign aac_valid_l = (counter_r[2] && (|IPV_in)) ? 1'b0 : 1'b1;
     //deco L4_in
     assign L4_1 = (counter_r[2] && ~IPV_in[0]) ? L4_out4_r : 
-                  (counter_r == 3'd3) ? {{6{L4_in_1[17]}}, L4_in_1} : 26'd0;
+                  (counter_r == 3'd3) ? {{6{L4_in_1[17]}}, L4_in_1} : 24'd0;
     assign L4_2 = {{6{L4_in_2[17]}}, L4_in_2} ;
     assign L4_3 = {{6{L4_in_3[17]}}, L4_in_3} ;
     assign L4_4 = {{6{L4_in_4[17]}}, L4_in_4} ;

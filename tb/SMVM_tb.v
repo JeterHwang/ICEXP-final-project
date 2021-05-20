@@ -36,10 +36,10 @@ module SMVM_tb;
     reg in_valid;
 
     wire out_valid;
-    wire [12:0] data_out;
+    wire [11:0] data_out;
 
-    reg [25:0] golden [0:row-1];
-    reg [12:0] H_golden; 
+    reg [23:0] golden [0:row-1];
+    reg [11:0] H_golden; 
 
     integer i;
     integer err_num;
@@ -131,10 +131,10 @@ module SMVM_tb;
         if(out_valid) begin
             // decide golden
             if(count & 1) begin
-                H_golden = golden[count >> 1][12:0];
+                H_golden = golden[count >> 1][11:0];
             end
             else begin
-                H_golden = golden[count >> 1][25:13];
+                H_golden = golden[count >> 1][23:12];
             end
 
             // answer 

@@ -80,7 +80,7 @@ def solve(matrix, vector):
     
     ans = []
     for ele in output:
-        ans.append(np.binary_repr(ele, width=26))
+        ans.append(np.binary_repr(ele, width=24))
     
     vec = []
     for ele in vector:
