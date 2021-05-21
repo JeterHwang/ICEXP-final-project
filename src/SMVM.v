@@ -58,23 +58,14 @@ reg [3:0]  output_counter, next_output_counter;
 
 // inter connect
 // alu
-wire            alu_l1_en ;
+//wire            alu_l1_en ;
 reg  [8*k-1:0]  alu_mat_in;
 reg  [8*k-1:0]  alu_vec_in;
-//wire [16*k-1:0] alu_l1_out;
-//wire [32*k-1:0] alu_l2_in ;
-//wire [17*6-1:0] alu_l2_out;
-//wire [17*6-1:0] alu_l3_in ;
-//wire [18*5-1:0] alu_l3_out;
-//wire [18*4-1:0] alu_l4_in ;
 wire [24*4-1:0] alu_l4_out;
 wire            alu_out_valid;
 
 // Map_table
 wire [3:0] IPV_l1_in ;
-//wire [3:0] IPV_l1_out;
-//wire [3:0] IPV_l2_out;
-//wire [3:0] IPV_l3_out;
   
 // reducer
 reg           reducer_ipv_in;
@@ -87,60 +78,6 @@ reg  [23:0]   alu_out[0:k-1];
 ///////////////////////////////////////////
 /////           submodule             /////
 ///////////////////////////////////////////
-/*
-Map_table_L1 map_l1(
-  .clk(clk),
-  .rst(rst_n),
-  .en(alu_l1_en),
-  .IPV_in(IPV_l1_in),
-  .L1_out(alu_l1_out),
-  .L2_in(alu_l2_in),
-  .IPV_out(IPV_l1_out)    
-);
-Map_table_L2 map_l2(
-  .clk(clk),
-  .rst(rst_n),
-  .IPV_in(IPV_l1_out),
-  .L2_out(alu_l2_out),
-  .L3_in(alu_l3_in),
-  .IPV_out(IPV_l2_out)  
-);
-Map_table_L3 map_l3(
-  .clk(clk),
-  .rst(rst_n),
-  .IPV_in(IPV_l2_out),
-  .L3_out(alu_l3_out),
-  .L4_in(alu_l4_in),
-  .IPV_out(IPV_l3_out)  
-
-);
-
-ALU_L1 alu_l1(
-  .matrix_in(alu_mat_in),
-  .vector_in(alu_vec_in),
-  .L1_out(alu_l1_out),
-  .IPV(IPV_l1_in),
-  .en(alu_l1_en)
-);
-ALU_L2 alu_l2(
-  .L2_in(alu_l2_in),
-  .L2_out(alu_l2_out) 
-);
-ALU_L3 alu_l3(
-  .L3_in(alu_l3_in),
-  .L3_out(alu_l3_out)
-);
-ALU_L4 alu_l4(
-  .clk(clk),
-  .rst(rst_n),
-  .ones(vov),
-  .IPV_in(IPV_l3_out),
-  .L4_in(alu_l4_in),
-  .L4_out(alu_l4_out),
-  .en(alu_l1_en),
-  .out_valid(alu_out_valid)
-);
-*/
 ALU_Maple4 alu(
   .clk(clk),
   .rst(rst_n),
