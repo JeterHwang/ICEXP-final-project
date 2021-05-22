@@ -112,13 +112,13 @@ IPV_reducer reducer(
 // next state logic
 always @(*) begin
   case(state)
-    IDLE   : next_state = in_valid ? COL_IN : IDLE;
+    IDLE   : next_state = in_valid_FF ? COL_IN : IDLE;
     COL_IN : next_state = VEC_IN;
     VEC_IN : begin
       if (counter == cols-1) next_state = VAL_IN;
       else next_state = VEC_IN;
     end
-    VAL_IN : next_state = in_valid ? IDX_IN : CAL;
+    VAL_IN : next_state = in_valid_FF ? IDX_IN : CAL;
     IDX_IN : next_state = VAL_IN;
     CAL    : begin
       if (counter == alu_stall_cycle) next_state = RST;
@@ -157,7 +157,7 @@ always @(*) begin
   end
   case(state)
     IDLE: begin
-      if (in_valid) begin
+      if (in_valid_FF) begin
         next_rows = col_idx_concat;
       end
       else begin
@@ -173,7 +173,7 @@ always @(*) begin
       next_vec[counter] = val_in_FF;
     end
     VAL_IN: begin
-      if (in_valid) begin
+      if (in_valid_FF) begin
         next_mat_val[counter] = val_in_FF;
         next_ipv[counter] = ipv_in_FF;
       end
