@@ -57,9 +57,7 @@ reg       ipv[0:k-1], next_ipv[0:k-1];         // k * ipv
 reg [7:0] val_in_FF, next_val_in_FF;
 reg       ipv_in_FF, next_ipv_in_FF;
 reg       in_valid_FF, next_in_valid_FF;
-assign next_val_in_FF = val_in;
-assign next_ipv_in_FF = ipv_in;
-assign next_in_valid_FF = in_valid;
+
 
 // output FF
 reg [11:0] output_buffer[0:2*k-1], next_output_buffer[0:2*k-1];
@@ -131,6 +129,12 @@ always @(*) begin
   endcase
 end
 
+// input FF
+always @(*) begin
+  next_val_in_FF = val_in;
+  next_ipv_in_FF = ipv_in;
+  next_in_valid_FF = in_valid;
+end
 
 // input logic
 integer j;
