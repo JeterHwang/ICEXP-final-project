@@ -53,7 +53,16 @@ reg [7:0] mat_val[0:k-1], next_mat_val[0:k-1]; // k * value
 reg [8:0] col_idx[0:k-1], next_col_idx[0:k-1]; // k * column index
 reg       ipv[0:k-1], next_ipv[0:k-1];         // k * ipv
 
-reg [11:0] output_buffer[0:2*k-2], next_output_buffer[0:2*k-2];
+// input FF
+reg [7:0] val_in_FF, next_val_in_FF;
+reg       ipv_in_FF, next_ipv_in_FF;
+reg       in_valid_FF, next_in_valid_FF;
+assign next_val_in_FF = val_in;
+assign next_ipv_in_FF = ipv_in;
+assign next_in_valid_FF = in_valid;
+
+// output FF
+reg [11:0] output_buffer[0:2*k-1], next_output_buffer[0:2*k-1];
 reg [3:0]  output_counter, next_output_counter;
 
 // inter connect
@@ -125,7 +134,7 @@ end
 
 // input logic
 integer j;
-assign col_idx_concat = { val_in, ipv_in };
+assign col_idx_concat = { val_in_FF, ipv_in_FF };
 always @(*) begin
   next_rows = rows;
   next_cols = cols;
@@ -157,12 +166,12 @@ always @(*) begin
     VEC_IN: begin
       if (counter == cols-1) next_counter = 0;
       else next_counter = counter + 1;
-      next_vec[counter] = val_in;
+      next_vec[counter] = val_in_FF;
     end
     VAL_IN: begin
       if (in_valid) begin
-        next_mat_val[counter] = val_in;
-        next_ipv[counter] = ipv_in;
+        next_mat_val[counter] = val_in_FF;
+        next_ipv[counter] = ipv_in_FF;
       end
       else begin
         next_counter = 0;
@@ -200,7 +209,7 @@ end
 // IPV reducer input logic
 always @(*) begin
   if (state == VAL_IN) begin
-    reducer_ipv_in = ipv_in;
+    reducer_ipv_in = ipv_in_FF;
     reducer_in_valid = 1'b1;
   end
   else begin
@@ -236,15 +245,14 @@ always @(*) begin
     alu_out[n] = alu_l4_out[24*(4-n)-1 -: 24];
   end
   if (alu_out_valid) begin
-    for (n = 0; n < k-1; n=n+1) begin
-      next_output_buffer[2*n]   = alu_out[n][11: 0];
-      next_output_buffer[2*n+1] = alu_out[n+1][23:12];
+    for (n = 0; n < k; n=n+1) begin
+      next_output_buffer[2*n]   = alu_out[n][23:12];
+      next_output_buffer[2*n+1] = alu_out[n][11: 0];
     end
-    next_output_buffer[2*k-2] = alu_out[k-1][11:0];
   end
   else begin
-    next_output_buffer[2*k-2] = 0;
-    for (n = 0; n < 2*k-2; n=n+1) begin
+    next_output_buffer[2*k-1] = 0;
+    for (n = 0; n < 2*k-1; n=n+1) begin
       next_output_buffer[n] = output_buffer[n+1];
     end
   end
@@ -256,9 +264,9 @@ always @(*) begin
   next_output_counter = output_counter;
   if (alu_out_valid) begin
     if (vov > 0) begin
-      next_output_counter = vov*2-1;
-      valid_o = 1'b1;
-      data_o = alu_out[0][23:12];
+      next_output_counter = vov*2;
+      valid_o = 1'b0;
+      data_o = 0;
     end
     else begin
       next_output_counter = 0;
@@ -286,6 +294,9 @@ end
 integer i;
 always@ (posedge clk or negedge rst_n) begin
   if (!rst_n) begin
+    val_in_FF <= 0;
+    ipv_in_FF <= 0;
+    in_valid_FF <= 0;
     state <= IDLE;
     rows <= 0;
     cols <= 0;
@@ -309,6 +320,9 @@ always@ (posedge clk or negedge rst_n) begin
     end
   end
   else begin
+    val_in_FF <= next_val_in_FF;
+    ipv_in_FF <= next_ipv_in_FF;
+    in_valid_FF <= next_in_valid_FF;
     state <= next_state;
     rows <= next_rows;
     cols <= next_cols;
