@@ -587,6 +587,7 @@ module ALU_L4 #(parameter k = 4)(
     reg  [23:0] L4_out2_r,L4_out3_r,L4_out4_r;
     wire [23:0] L4_out2_w,L4_out3_w,L4_out4_w;
     reg  [2:0] counter_r,counter_w;
+    wire counter_5;
     
     /* ================= Submodules =============== */
     AAC aac_l(
@@ -597,10 +598,11 @@ module ALU_L4 #(parameter k = 4)(
         .out(AAC_L)
     );
     /* ================== Conti =================== */
+    assign counter_5 = (counter_r==3'd5) ? 1'b1 : 1'b0;
     assign counter = counter_r;
-    assign aac_valid_l = ((counter_r==3'd5) && (|IPV_in)) ? 1'b0 : 1'b1;
+    assign aac_valid_l = (counter_5 && (|IPV_in)) ? 1'b0 : 1'b1;
     //deco L4_in
-    assign L4_1 = ((counter_r==3'd5) && ~IPV_in[0]) ? L4_out4_r : 
+    assign L4_1 = (counter_5 && ~IPV_in[0]) ? L4_out4_r : 
                   (counter_r==3'd4)  ? {{6{L4_in_1[17]}}, L4_in_1} : 24'd0;
     assign L4_2 = {{6{L4_in_2[17]}}, L4_in_2} ;
     assign L4_3 = {{6{L4_in_3[17]}}, L4_in_3} ;
@@ -616,14 +618,14 @@ module ALU_L4 #(parameter k = 4)(
     assign L4_out4_w = L4_4; 
  
     //output is ready
-    assign out_valid = (counter_r==3'd5)? 1'b1 : 1'b0 ;
+    assign out_valid = (counter_5)? 1'b1 : 1'b0 ;
 
     /* ================ Combination =============== */
     always @(*) begin
         counter_w = counter_r;
         if (en && (~|counter_r)) counter_w = 3'd1;
         else if ((counter_r>=3'd1)&&(counter_r<3'd5)) counter_w = counter_r + 3'd1;
-        else if (counter_r==3'd5)    counter_w = 3'd0;
+        else if (counter_5)    counter_w = 3'd0;
     end
     
     /* ================ Sequencial ================ */
