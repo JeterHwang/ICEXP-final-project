@@ -690,6 +690,7 @@ module mul_pipeline (
     /* ================ Combination =============== */
     always @(*) begin
         sum_up_w   = sum_up_r;
+        sum_down_w = 16'b0;
         if (en) begin
             sum_up_w   = sum_p5 + sum_p6 + sum_p7 + sum_p8 ;
             sum_down_w = sum_p1 + sum_p2 + sum_p3 + sum_p4 ;
