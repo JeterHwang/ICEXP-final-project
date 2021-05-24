@@ -22,6 +22,7 @@ cd tb
 
 RTL : ncverilog SMVM_tb.v +define+RTL +access+r
 SYN : ncverilog SMVM_tb.v -v fsa0m_a_generic_core_21.lib.src +define+SYN +access+r
+APR : ncverilog SMVM_tb.v -v fsa0m_a_generic_core_21.lib.src fsa0m_a_t33_generic_io_21.lib.src +define+APR +access+r
 ```
 
 ## Pattern Generating
@@ -80,4 +81,23 @@ python3 generate.py
     ====== output =======
     data_o : 12 bit + 12 bit
     
+```
+
+## APR command
+```
+setAnalysisMode -analysisType bcwc
+write_sdf -max_view av_func_mode_max -min_view av_func_mode_min -edges noedge -splitsetuphold -remashold -splitrecrem -min_period_edges none SMVM_apr.sdf
+
+add_text -layer metal5 -pt 1435 640 -label IOVDD -height 10
+add_text -layer metal5 -pt 1435 750 -label IOVSS -height 10
+
+setStreamOutMode -specifyViaName default -SEvianames false -virtualConnection false -uniquifyCellNamesPrefix false -snapToMGrid false -textSize 1 -version 3
+streamOut SMVM_apr.gds -mapFile streamOut.map -merge {./Phantom/fsa0m_a_generic_core_cic.gds ./Phantom/fsa0m_a_t33_generic_io_cic.gds ./Phantom/BONDPAD.gds} -stripes 1 -unit 1000 -mode ALL
+```
+
+## LVS command
+```
+source /usr/mentor/CIC/calibre.cshrc
+v2lvs -l core.v -l umc18_io_lvs.v -s core.spi -s umc18_io_lvs.spi -v CHIP.v -o CHIP.spi
+calibre -lvs -hier -auto G-DF-MIXED_MODE_RFCMOS18-1.8V_3.3V-1P6M-MMC_CALIBRE-LVS-2.1-P8.txt
 ```
