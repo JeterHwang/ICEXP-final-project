@@ -22,7 +22,7 @@
 
 module SMVM_tb;
     parameter k = 4;
-    parameter non_zero = 32880;
+    parameter non_zero = 13140;
     parameter row = 9'd256;
     parameter col = 9'd256;
 
@@ -37,11 +37,8 @@ module SMVM_tb;
     reg [7:0] val_in;
     reg in_valid;
 
-    wire [2:0] inst_i_NULL;
-    wire [5:0] data_b_NULL;
     wire out_valid;
     wire [11:0] data_out;
-    wire [2:0] out_NULL;
 
     reg [23:0] golden [0:row-1];
     reg [11:0] H_golden; 
@@ -55,9 +52,8 @@ module SMVM_tb;
         .clk_p_i(clk),
         .reset_n_i(reset_n),
         .data_a_i(val_in),
-        .data_b_i({data_b_NULL, in_valid, ipv_in}),
-        .inst_i(inst_i_NULL),
-        .data_o({out_NULL, out_valid, data_out})
+        .data_b_i({in_valid, ipv_in}),
+        .data_o({out_valid, data_out})
     );
 
     `ifdef SDF
@@ -65,8 +61,13 @@ module SMVM_tb;
     `endif
     
     initial begin
-        $fsdbDumpfile("top.fsdb");            
-        $fsdbDumpvars(0, SMVM_tb,"+mda");
+        `ifdef VCD
+            $dumpfile("top.vcd"); 
+            $dumpvars(0, SMVM_tb);
+        `else
+            $fsdbDumpfile("top.fsdb");            
+            $fsdbDumpvars(0, SMVM_tb,"+mda");
+        `endif
         $readmemb(`golden, golden);
 
         ipv         = $fopen(`dataIn1, "r");

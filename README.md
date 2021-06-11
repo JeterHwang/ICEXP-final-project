@@ -14,6 +14,7 @@ source /usr/cad/synopsys/CIC/verdi.cshrc
 source /usr/cad/synopsys/CIC/synthesis.cshrc
 source /usr/cad/innovus/CIC/license.cshrc
 source /usr/cad/innovus/CIC/innovus.cshrc
+source /usr/cad/synopsys/CIC/primetime.cshrc
 ```
 
 ## test Command
@@ -23,6 +24,7 @@ cd tb
 RTL : ncverilog SMVM_tb.v +define+RTL +access+r
 SYN : ncverilog SMVM_tb.v -v fsa0m_a_generic_core_21.lib.src +define+SYN +access+r
 APR : ncverilog SMVM_tb.v -v fsa0m_a_generic_core_21.lib.src fsa0m_a_t33_generic_io_21.lib.src +define+APR +access+r
+
 ```
 
 ## Pattern Generating
@@ -85,8 +87,16 @@ python3 generate.py
 
 ## APR command
 ```
+create_ccopt_clock_tree_spec -file ccopt.spec
+source ./ccopt.spec
+
+setAnalysisMode -analysisType onChipVariation
+
 setAnalysisMode -analysisType bcwc
 write_sdf -max_view av_func_mode_max -min_view av_func_mode_min -edges noedge -splitsetuphold -remashold -splitrecrem -min_period_edges none SMVM_apr.sdf
+
+perl addbonding_v3.8D.pl SMVM_apr.def
+source addbond.cmd
 
 add_text -layer metal5 -pt 1435 640 -label IOVDD -height 10
 add_text -layer metal5 -pt 1435 750 -label IOVSS -height 10
@@ -100,4 +110,11 @@ streamOut SMVM_apr.gds -mapFile streamOut.map -merge {./Phantom/fsa0m_a_generic_
 source /usr/mentor/CIC/calibre.cshrc
 v2lvs -l core.v -l umc18_io_lvs.v -s core.spi -s umc18_io_lvs.spi -v CHIP.v -o CHIP.spi
 calibre -lvs -hier -auto G-DF-MIXED_MODE_RFCMOS18-1.8V_3.3V-1P6M-MMC_CALIBRE-LVS-2.1-P8.txt
+```
+## DRC command
+```
+source /usr/mentor/CIC/calibre.cshrc
+calibre -drc G-DF-Mixed_Mode_RFCMOS18-1.8v_3.3v-1P6M-MMC-Calibre-DRC-2.11_P2
+
+grep ^RULECHECK QA_pass.sum | grep -v 0$
 ```

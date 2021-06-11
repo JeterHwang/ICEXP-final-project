@@ -35,7 +35,7 @@
 
 module SMVM_tb;
     parameter k = 4;
-    parameter non_zero = 32880;
+    parameter non_zero = 13140;
     parameter row = 9'd256;
     parameter col = 9'd256;
 
@@ -76,8 +76,13 @@ module SMVM_tb;
     `endif
     
     initial begin
-        $fsdbDumpfile("top.fsdb");            
-        $fsdbDumpvars(0, SMVM_tb,"+mda");
+        `ifdef VCD
+            dumpfile("top.vcd"); 
+            dumpvars();
+        `else
+            $fsdbDumpfile("top.fsdb");            
+            $fsdbDumpvars(0, SMVM_tb,"+mda");
+        `endif
         $readmemb(`golden, golden);
 
         ipv         = $fopen(`dataIn1, "r");

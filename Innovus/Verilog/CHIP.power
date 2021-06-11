@@ -1,0 +1,174 @@
+Information: Running time_based power analysis... (PWR-601)
+Information: The waveform options are:
+		File name:	vcd.out
+		File format:	out
+		Time interval:	1ns
+		Hierarchical level:	all
+
+Information: Power analysis is running, please wait ...
+
+Information: analysis is done for time window (0ns - 530940ns)
+
+****************************************
+Report : Time Based Power
+	-hierarchy
+	-verbose
+Design : CHIP
+Version: N-2017.12
+Date   : Fri Jun 11 11:57:28 2021
+****************************************
+
+Sampling Interval: 1 ns
+
+Library(s) Used:
+
+    fsa0m_a_generic_core_ff1p98vm40c (File: /home/raid7_2/userb07/b07068/ICEXP-final-project/Innovus/Verilog/fsa0m_a_generic_core_ff1p98vm40c.db)
+    fsa0m_a_generic_core_ss1p62v125c (File: /home/raid7_2/userb07/b07068/ICEXP-final-project/Innovus/Verilog/fsa0m_a_generic_core_ss1p62v125c.db)
+    fsa0m_a_generic_core_tt1p8v25c (File: /home/raid7_2/userb07/b07068/ICEXP-final-project/Innovus/Verilog/fsa0m_a_generic_core_tt1p8v25c.db)
+    fsa0m_a_t33_generic_io_ff1p98vm40c (File: /home/raid7_2/userb07/b07068/ICEXP-final-project/Innovus/Verilog/fsa0m_a_t33_generic_io_ff1p98vm40c.db)
+    fsa0m_a_t33_generic_io_ss1p62v125c (File: /home/raid7_2/userb07/b07068/ICEXP-final-project/Innovus/Verilog/fsa0m_a_t33_generic_io_ss1p62v125c.db)
+    fsa0m_a_t33_generic_io_tt1p8v25c (File: /home/raid7_2/userb07/b07068/ICEXP-final-project/Innovus/Verilog/fsa0m_a_t33_generic_io_tt1p8v25c.db)
+
+
+Operating Conditions: BCCOM   Library: fsa0m_a_generic_core_ff1p98vm40c
+Wire Load Model Mode: enclosed
+
+Cell               Design       Wire_model  Library       Selection_type
+--------------------------------------------------------------------------------
+                   CHIP         enG100K     fsa0m_a_generic_core_ff1p98vm40c
+                                                          automatic-by-area
+yoyo               SMVM         enG100K     fsa0m_a_generic_core_ff1p98vm40c
+                                                          automatic-by-area
+yoyo/r600          SMVM_DW01_inc_0
+                                enG5K       fsa0m_a_generic_core_ff1p98vm40c
+                                                          automatic-by-area
+yoyo/reducer       IPV_reducer  enG5K       fsa0m_a_generic_core_ff1p98vm40c
+                                                          automatic-by-area
+yoyo/alu           ALU_Maple4   enG10K      fsa0m_a_generic_core_ff1p98vm40c
+                                                          automatic-by-area
+yoyo/alu/map_l3    Map_table_L3 enG5K       fsa0m_a_generic_core_ff1p98vm40c
+                                                          automatic-by-area
+yoyo/alu/alu_l1    ALU_L1       enG5K       fsa0m_a_generic_core_ff1p98vm40c
+                                                          automatic-by-area
+yoyo/alu/alu_l1/mult_193
+                   ALU_L1_DW_mult_tc_1
+                                enG5K       fsa0m_a_generic_core_ff1p98vm40c
+                                                          automatic-by-area
+yoyo/alu/alu_l1/mult_194
+                   ALU_L1_DW_mult_tc_3
+                                enG5K       fsa0m_a_generic_core_ff1p98vm40c
+                                                          automatic-by-area
+yoyo/alu/alu_l1/mult_195
+                   ALU_L1_DW_mult_tc_2
+                                enG5K       fsa0m_a_generic_core_ff1p98vm40c
+                                                          automatic-by-area
+yoyo/alu/alu_l1/mult_196
+                   ALU_L1_DW_mult_tc_0
+                                enG5K       fsa0m_a_generic_core_ff1p98vm40c
+                                                          automatic-by-area
+yoyo/alu/alu_l2    ALU_L2       enG5K       fsa0m_a_generic_core_ff1p98vm40c
+                                                          automatic-by-area
+yoyo/alu/alu_l2/add_342
+                   ALU_L2_DW01_add_0
+                                enG5K       fsa0m_a_generic_core_ff1p98vm40c
+                                                          automatic-by-area
+yoyo/alu/alu_l2/add_341
+                   ALU_L2_DW01_add_1
+                                enG5K       fsa0m_a_generic_core_ff1p98vm40c
+                                                          automatic-by-area
+yoyo/alu/alu_l3    ALU_L3       enG5K       fsa0m_a_generic_core_ff1p98vm40c
+                                                          automatic-by-area
+yoyo/alu/alu_l3/add_462
+                   ALU_L3_DW01_add_0
+                                enG5K       fsa0m_a_generic_core_ff1p98vm40c
+                                                          automatic-by-area
+yoyo/alu/alu_l4    ALU_L4       enG5K       fsa0m_a_generic_core_ff1p98vm40c
+                                                          automatic-by-area
+yoyo/alu/alu_l4/aac_l
+                   AAC          enG5K       fsa0m_a_generic_core_ff1p98vm40c
+                                                          automatic-by-area
+yoyo/alu/alu_l4/aac_l/add_1_root_add_28_2
+                   AAC_DW01_add_0
+                                enG5K       fsa0m_a_generic_core_ff1p98vm40c
+                                                          automatic-by-area
+yoyo/alu/alu_l4/aac_l/add_27
+                   AAC_DW01_add_1
+                                enG5K       fsa0m_a_generic_core_ff1p98vm40c
+                                                          automatic-by-area
+yoyo/alu/map_l1    Map_table_L1 enG5K       fsa0m_a_generic_core_ff1p98vm40c
+                                                          automatic-by-area
+yoyo/alu/map_l2    Map_table_L2 enG5K       fsa0m_a_generic_core_ff1p98vm40c
+                                                          automatic-by-area
+
+Power-specific unit information :
+    Voltage Units = 1 V
+    Capacitance Units = 1 pf
+    Time Units = 1 ns
+    Dynamic Power Units = 1 W
+    Leakage Power Units = 1 W
+
+
+
+                                      Int      Switch   Leak      Total
+Hierarchy                             Power    Power    Power     Power    %
+--------------------------------------------------------------------------------
+CHIP                                  1.22e-02 8.87e-03 1.19e-06  2.11e-02 100.0
+  yoyo (SMVM)                         1.19e-02 8.83e-03 7.99e-07  2.07e-02  98.3
+    r600 (SMVM_DW01_inc_0)            1.92e-06 1.00e-06 6.35e-10  2.92e-06   0.0
+    reducer (IPV_reducer)             9.18e-05 1.38e-05 3.63e-09  1.06e-04   0.5
+    alu (ALU_Maple4)                  1.59e-03 2.83e-04 1.12e-07  1.87e-03   8.9
+      map_l3 (Map_table_L3)           2.46e-04 6.02e-06 1.28e-08  2.52e-04   1.2
+      alu_l1 (ALU_L1)                 3.86e-05 1.86e-05 3.22e-08  5.73e-05   0.3
+        mult_193 (ALU_L1_DW_mult_tc_1)
+                                      9.77e-06 4.57e-06 7.62e-09  1.44e-05   0.1
+        mult_194 (ALU_L1_DW_mult_tc_3)
+                                      9.69e-06 2.60e-06 7.68e-09  1.23e-05   0.1
+        mult_195 (ALU_L1_DW_mult_tc_2)
+                                      7.25e-06 4.22e-06 7.30e-09  1.15e-05   0.1
+        mult_196 (ALU_L1_DW_mult_tc_0)
+                                      9.45e-06 4.88e-06 9.42e-09  1.43e-05   0.1
+      alu_l2 (ALU_L2)                 1.10e-05 1.31e-05 2.84e-09  2.41e-05   0.1
+        add_342 (ALU_L2_DW01_add_0)   5.27e-06 5.03e-06 1.41e-09  1.03e-05   0.0
+        add_341 (ALU_L2_DW01_add_1)   5.71e-06 8.04e-06 1.41e-09  1.37e-05   0.1
+      alu_l3 (ALU_L3)                 7.44e-06 5.85e-06 1.50e-09  1.33e-05   0.1
+        add_462 (ALU_L3_DW01_add_0)   7.44e-06 5.84e-06 1.49e-09  1.33e-05   0.1
+      alu_l4 (ALU_L4)                 4.20e-04 7.61e-05 2.20e-08  4.96e-04   2.4
+        aac_l (AAC)                   1.53e-04 1.69e-05 7.68e-09  1.70e-04   0.8
+          add_1_root_add_28_2 (AAC_DW01_add_0)
+                                      4.23e-06 5.48e-06 1.09e-09  9.70e-06   0.0
+          add_27 (AAC_DW01_add_1)     3.94e-06 3.46e-06 9.14e-10  7.39e-06   0.0
+      map_l1 (Map_table_L1)           4.91e-04 6.81e-05 1.99e-08  5.59e-04   2.7
+      map_l2 (Map_table_L2)           3.60e-04 3.31e-05 1.83e-08  3.93e-04   1.9
+
+
+                                      Peak     Peak            Glitch   X-tran
+Hierarchy                             Power    Time            Power    Power
+--------------------------------------------------------------------------------
+CHIP                                     0.913      20-21      2.65e-04    0.000
+  yoyo (SMVM)                            0.910      20-21      2.65e-04    0.000
+    r600 (SMVM_DW01_inc_0)            5.28e-04    2490-2491    4.14e-09    0.000
+    reducer (IPV_reducer)             2.83e-03  388070-388071  3.18e-06    0.000
+    alu (ALU_Maple4)                  4.36e-02  189390-189391  9.04e-06    0.000
+      map_l3 (Map_table_L3)           9.48e-03  239990-239991  1.20e-07    0.000
+      alu_l1 (ALU_L1)                 5.92e-03  510010-510011  6.68e-12    0.000
+        mult_193 (ALU_L1_DW_mult_tc_1)
+                                      1.94e-03  216890-216891     0.000    0.000
+        mult_194 (ALU_L1_DW_mult_tc_3)
+                                      1.82e-03  394170-394171  6.68e-12    0.000
+        mult_195 (ALU_L1_DW_mult_tc_2)
+                                      1.57e-03  112250-112251     0.000    0.000
+        mult_196 (ALU_L1_DW_mult_tc_0)
+                                      1.82e-03  460890-460891     0.000    0.000
+      alu_l2 (ALU_L2)                 3.95e-03  140910-140911  1.47e-06    0.000
+        add_342 (ALU_L2_DW01_add_0)   2.04e-03  213710-213711     0.000    0.000
+        add_341 (ALU_L2_DW01_add_1)   2.48e-03  279150-279151  1.47e-06    0.000
+      alu_l3 (ALU_L3)                 2.52e-03  198690-198691  2.61e-08    0.000
+        add_462 (ALU_L3_DW01_add_0)   2.52e-03  198690-198691  2.61e-08    0.000
+      alu_l4 (ALU_L4)                 2.57e-02  399530-399531  1.12e-06    0.000
+        aac_l (AAC)                   1.00e-02  480970-480971  7.08e-07    0.000
+          add_1_root_add_28_2 (AAC_DW01_add_0)
+                                      2.21e-03  248650-248651  5.79e-07    0.000
+          add_27 (AAC_DW01_add_1)     1.25e-03  433291-433292  8.44e-08    0.000
+      map_l1 (Map_table_L1)           2.00e-02  189390-189391  5.02e-06    0.000
+      map_l2 (Map_table_L2)           1.36e-02   24930-24931   1.27e-06    0.000
+1

@@ -10,8 +10,8 @@ vov_path = '../dat/vov_out.dat'
 golden_path = '../dat/data_out.dat'
 
 data_range = np.arange(-128, 128, 1)
-probability_matrix = np.array([0.5/255 for i in range(256)])
-probability_matrix[128] = 0.5
+probability_matrix = np.array([0.2/255 for i in range(256)])
+probability_matrix[128] = 0.8
 probability_vector = np.array([1.0/256 for i in range(256)])
 
 array_row = 256
