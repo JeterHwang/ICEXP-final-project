@@ -1,6 +1,7 @@
 import numpy as np
 import os
 from os import path
+import time 
 
 vector_path = '../dat/vector_in.dat'
 matrix_path = '../dat/matrix_in.dat'
@@ -16,6 +17,18 @@ probability_vector = np.array([1.0/256 for i in range(256)])
 
 array_row = 256
 array_col = 256
+
+def print_time(matrix, vector):
+    start_time = time.time()
+    result = []
+    for i in range(array_row):
+        S = 0
+        for j in range(array_col):
+            S = S + matrix[i][j] * vector[j]
+        result.append(S)
+    # result = np.array(result)
+    end_time = time.time()
+    print(end_time - start_time)
 
 def generate_matrix():
     return np.random.choice(data_range, (array_row, array_col), p=probability_matrix)
@@ -100,6 +113,7 @@ if __name__ == '__main__':
     np.random.seed(0)
     matrix = generate_matrix()
     vector = generate_vector()
+    print_time(matrix, vector)
     vec, ele, col, ipv, vov, ans = solve(matrix, vector)
     writeData(vec, ele, col, ipv, vov, ans)
 
