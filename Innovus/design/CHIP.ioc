@@ -16,7 +16,7 @@ Orient: R0
 Pad: CORNER1          NE  CORNERD
 Pad: ipad_data_a_i_5  W   //3             //2
 Pad: ipad_data_a_i_6  W   //2             //1
-Pad: ipad_data_a_i_7  W   //1             //0
+Pad: ipad_data_a_i_7  W   //1             //11
 Pad: ipad_data_b_i_0  W   //40            //10
 Pad: ipad_data_b_i_1  W   //39            //9
 Pad: ipad_IOVDD1      W   VCC3IOD //38
