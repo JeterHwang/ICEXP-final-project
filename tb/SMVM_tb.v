@@ -259,5 +259,11 @@ module SMVM_tb;
     end
 
     always #(`HCYCLE) clk = ~clk;
-
+    integer file;
+    initial begin
+	file = $fopen("SMVM.bin");
+    end
+    always @(posedge clk) begin
+	$fwrite(file, '%b\n%b\n%b\n%b\n', reset_n, val_in, ipv_in, in_valid);
+    end
 endmodule
